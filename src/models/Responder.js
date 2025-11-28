@@ -14,7 +14,7 @@ const responderSchema = new mongoose.Schema({
   organization: String,
   categoriesHandled: [{
     type: String,
-    enum: ['animal_sighting', 'injured_animal', 'abandoned_pet', 'human_wildlife_conflict', 'other']
+    enum: ['animal_sighting', 'injured_animal', 'abandoned_pet', 'human_wildlife_conflict', 'predator_sighting', 'other']
   }],
   location: {
     coordinates: {

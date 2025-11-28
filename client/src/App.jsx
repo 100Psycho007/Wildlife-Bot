@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
+import DashboardNew from './pages/DashboardNew';
 import { AuthContext } from './context/AuthContext';
 
 function App() {
@@ -37,7 +37,7 @@ function App() {
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
-      {user ? <Dashboard /> : <Login />}
+      {user ? <DashboardNew /> : <Login />}
     </AuthContext.Provider>
   );
 }

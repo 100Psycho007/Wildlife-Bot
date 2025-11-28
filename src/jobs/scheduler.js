@@ -1,5 +1,6 @@
 const cron = require('node-cron');
 const routingService = require('../services/routingService');
+const escalationService = require('./escalation');
 const logger = require('../utils/logger');
 
 class Scheduler {
@@ -15,6 +16,30 @@ class Scheduler {
         await routingService.checkTimeoutCases();
       } catch (error) {
         logger.error('Error in timeout case check job', { error: error.message });
+      }
+    }, {
+      scheduled: false
+    });
+
+    // Check escalations every 5 minutes
+    const escalationJob = cron.schedule('*/5 * * * *', async () => {
+      try {
+        logger.info('Running escalation check');
+        await escalationService.checkEscalations();
+      } catch (error) {
+        logger.error('Error in escalation check job', { error: error.message });
+      }
+    }, {
+      scheduled: false
+    });
+
+    // Daily digest at 07:00
+    const digestJob = cron.schedule('0 7 * * *', async () => {
+      try {
+        logger.info('Sending daily digest');
+        await escalationService.sendDailyDigest();
+      } catch (error) {
+        logger.error('Error in daily digest job', { error: error.message });
       }
     }, {
       scheduled: false
@@ -44,7 +69,7 @@ class Scheduler {
       scheduled: false
     });
 
-    this.jobs = [timeoutJob, cleanupJob, responderStatusJob];
+    this.jobs = [timeoutJob, escalationJob, digestJob, cleanupJob, responderStatusJob];
 
     // Start all jobs
     this.jobs.forEach(job => job.start());

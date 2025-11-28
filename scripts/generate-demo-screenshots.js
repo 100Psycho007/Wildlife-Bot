@@ -2,19 +2,12 @@ const puppeteer = require('puppeteer');
 const path = require('path');
 const fs = require('fs');
 
-const DASHBOARD_URL = process.env.DASHBOARD_URL || 'http://localhost:5173';
-const ADMIN_EMAIL = 'admin@wildlife-demo.local';
-const ADMIN_PASSWORD = 'demo123';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const SCREENSHOT_DIR = path.join(__dirname, '../static/demo-screenshots');
 
 async function generateScreenshots() {
-  console.log('Starting screenshot generation...');
+  console.log('Launching browser...');
   
-  // Ensure screenshot directory exists
-  if (!fs.existsSync(SCREENSHOT_DIR)) {
-    fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
-  }
-
   const browser = await puppeteer.launch({
     headless: 'new',
     args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -24,19 +17,24 @@ async function generateScreenshots() {
     const page = await browser.newPage();
     await page.setViewport({ width: 1920, height: 1080 });
 
-    console.log('Navigating to dashboard...');
-    await page.goto(DASHBOARD_URL, { waitUntil: 'networkidle2' });
+    // Ensure screenshot directory exists
+    if (!fs.existsSync(SCREENSHOT_DIR)) {
+      fs.mkdirSync(SCREENSHOT_DIR, { recursive: true });
+    }
+
+    console.log('Navigating to login page...');
+    await page.goto(FRONTEND_URL, { waitUntil: 'networkidle0', timeout: 30000 });
 
     // Login
     console.log('Logging in...');
-    await page.waitForSelector('input[type="email"]');
-    await page.type('input[type="email"]', ADMIN_EMAIL);
-    await page.type('input[type="password"]', ADMIN_PASSWORD);
+    await page.waitForSelector('input[type="email"]', { timeout: 10000 });
+    await page.type('input[type="email"]', 'admin@wildlife-demo.local');
+    await page.type('input[type="password"]', 'demo123');
     await page.click('button[type="submit"]');
-
+    
     // Wait for dashboard to load
-    await page.waitForSelector('table', { timeout: 10000 });
-    await page.waitForTimeout(2000); // Let data load
+    await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 30000 });
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Screenshot 1: Dashboard overview
     console.log('Capturing dashboard overview...');
@@ -45,50 +43,57 @@ async function generateScreenshots() {
       fullPage: false
     });
 
-    // Click on Hindi voice case
-    console.log('Opening Hindi voice case...');
-    const rows = await page.$$('tbody tr');
+    // Click on a voice case (Hindi)
+    console.log('Opening voice case detail...');
+    await page.waitForSelector('.case-card', { timeout: 10000 });
+    const caseCards = await page.$$('.case-card');
     
-    for (const row of rows) {
-      const text = await row.evaluate(el => el.textContent);
-      if (text.includes('VOICE-HI')) {
-        await row.click();
-        break;
+    if (caseCards.length > 0) {
+      // Find the Hindi voice case
+      let found = false;
+      for (const card of caseCards) {
+        const text = await card.evaluate(el => el.textContent);
+        if (text.includes('WR-DEMO-VOICE-HI-001') || text.includes('Hindi')) {
+          await card.click();
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          found = true;
+          break;
+        }
       }
+
+      // If not found, click first case
+      if (!found && caseCards.length > 0) {
+        await caseCards[0].click();
+        await new Promise(resolve => setTimeout(resolve, 1500));
+      }
+
+      // Screenshot 2: Voice case detail
+      console.log('Capturing voice case detail...');
+      await page.screenshot({
+        path: path.join(SCREENSHOT_DIR, 'voice_case_detail_hi.png'),
+        fullPage: false
+      });
     }
 
-    // Wait for detail panel
-    await page.waitForTimeout(1000);
-
-    // Screenshot 2: Voice case detail
-    console.log('Capturing voice case detail...');
-    await page.screenshot({
-      path: path.join(SCREENSHOT_DIR, 'voice_case_detail.png'),
-      fullPage: false
-    });
-
-    console.log('Screenshots generated successfully!');
-    console.log(`Saved to: ${SCREENSHOT_DIR}`);
+    console.log('✓ Screenshots generated successfully');
+    console.log(`  - ${path.join(SCREENSHOT_DIR, 'dashboard_overview.png')}`);
+    console.log(`  - ${path.join(SCREENSHOT_DIR, 'voice_case_detail_hi.png')}`);
 
   } catch (error) {
-    console.error('Error generating screenshots:', error);
+    console.error('Screenshot generation failed:', error.message);
     throw error;
   } finally {
     await browser.close();
   }
 }
 
-// Run if called directly
+module.exports = { generateScreenshots };
+
 if (require.main === module) {
   generateScreenshots()
-    .then(() => {
-      console.log('Done!');
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error('Failed:', error);
+    .then(() => process.exit(0))
+    .catch(error => {
+      console.error(error);
       process.exit(1);
     });
 }
-
-module.exports = { generateScreenshots };

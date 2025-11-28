@@ -25,185 +25,237 @@ router.post('/demo-voice-cases', async (req, res) => {
     let adminUser = await User.findOne({ email: 'admin@wildlife-demo.local' });
     if (!adminUser) {
       adminUser = await User.create({
-        name: 'Demo Admin',
+        name: 'System Administrator',
         email: 'admin@wildlife-demo.local',
         password: 'demo123',
         role: 'ADMIN',
-        whatsappNumber: '+1234567890',
+        whatsappNumber: '+919800000000',
         isActive: true
       });
     }
 
-    // Create demo responder user
-    let responderUser = await User.findOne({ email: 'responder@wildlife-demo.local' });
-    if (!responderUser) {
-      responderUser = await User.create({
-        name: 'Demo Responder',
-        email: 'responder@wildlife-demo.local',
-        password: 'demo123',
-        role: 'RESPONDER',
-        whatsappNumber: '+1234567891',
-        isActive: true
-      });
-    }
-
-    // Create demo responder profile
-    let responder = await Responder.findOne({ whatsappNumber: '+1234567891' });
-    if (!responder) {
-      responder = await Responder.create({
-        name: 'Demo Responder',
-        whatsappNumber: '+1234567891',
-        email: 'responder@wildlife-demo.local',
-        organization: 'Wildlife Rescue Demo',
-        categoriesHandled: ['injured_animal', 'animal_sighting', 'abandoned_pet'],
+    // Create demo responders
+    let raviKumar = await Responder.findOne({ whatsappNumber: '+919876543001' });
+    if (!raviKumar) {
+      raviKumar = await Responder.create({
+        name: 'Ravi Kumar',
+        whatsappNumber: '+919876543001',
+        email: 'ravi.kumar@rescue.in',
+        organization: 'Gurugram Animal Rescue',
+        categoriesHandled: ['injured_animal'],
         location: {
-          coordinates: { latitude: 40.7128, longitude: -74.0060 },
-          address: 'New York, NY',
-          serviceRadius: 25
+          coordinates: { latitude: 28.4595, longitude: 77.0266 },
+          address: 'Gurugram, Haryana',
+          serviceRadius: 30
         },
         status: 'online',
+        isActive: true,
+        lastSeen: new Date()
+      });
+    }
+
+    let meenaPatel = await Responder.findOne({ whatsappNumber: '+919876543002' });
+    if (!meenaPatel) {
+      meenaPatel = await Responder.create({
+        name: 'Dr. Meena Patel',
+        whatsappNumber: '+919876543002',
+        email: 'meena.patel@wildlife.in',
+        organization: 'Mysore Wildlife Rescue',
+        categoriesHandled: ['predator_sighting', 'injured_animal'],
+        location: {
+          coordinates: { latitude: 12.2958, longitude: 76.6394 },
+          address: 'Mysuru, Karnataka',
+          serviceRadius: 40
+        },
+        status: 'online',
+        isActive: true,
+        lastSeen: new Date()
+      });
+    }
+
+    // Create demo reporter users
+    let reporter1 = await User.findOne({ whatsappNumber: '+919812340001' });
+    if (!reporter1) {
+      reporter1 = await User.create({
+        name: 'Citizen Reporter 1',
+        whatsappNumber: '+919812340001',
         isActive: true
       });
     }
 
-    // Create demo reporter user
-    let reporterUser = await User.findOne({ whatsappNumber: '+1555123456' });
-    if (!reporterUser) {
-      reporterUser = await User.create({
-        name: 'Demo Reporter',
-        whatsappNumber: '+1555123456',
+    let reporter2 = await User.findOne({ whatsappNumber: '+919812340002' });
+    if (!reporter2) {
+      reporter2 = await User.create({
+        name: 'Citizen Reporter 2',
+        whatsappNumber: '+919812340002',
         isActive: true
       });
     }
 
-    const demoPhone = '+1555123456';
-    const encryptedPhone = encryptField(demoPhone);
-    const maskedPhone = maskPhoneNumber(demoPhone);
+    let reporter3 = await User.findOne({ whatsappNumber: '+919812340003' });
+    if (!reporter3) {
+      reporter3 = await User.create({
+        name: 'Citizen Reporter 3',
+        whatsappNumber: '+919812340003',
+        isActive: true
+      });
+    }
 
     // Demo case 1: WhatsApp case
+    const phone1 = '+919812340001';
     const whatsappCase = await Report.create({
       caseId: 'WR-DEMO-WA-001',
-      reporterId: reporterUser._id,
+      reporterId: reporter1._id,
       source: 'whatsapp',
-      language: 'en',
-      phoneMasked: maskedPhone,
-      phoneEncrypted: encryptedPhone,
+      language: 'English',
+      phoneMasked: maskPhoneNumber(phone1),
+      phoneEncrypted: encryptField(phone1),
       category: 'injured_animal',
       location: {
-        coordinates: { latitude: 40.7580, longitude: -73.9855 },
-        address: 'Times Square, New York, NY',
-        description: 'Near the red stairs',
-        district: 'Manhattan',
-        latEncrypted: encryptField('40.7580'),
-        lngEncrypted: encryptField('-73.9855')
+        coordinates: { latitude: 12.9716, longitude: 77.5946 },
+        address: 'MG Road, Bengaluru',
+        description: 'Near Nandi statue',
+        district: 'Bengaluru Urban',
+        latEncrypted: encryptField('12.9716'),
+        lngEncrypted: encryptField('77.5946')
       },
-      description: 'Injured pigeon with damaged wing, unable to fly. Bird appears to be in distress.',
+      description: 'Injured pigeon near MG Road; small wound on wing. Location: MG Road, near Nandi statue. Attached photo.',
       status: 'pending',
       priority: 'medium',
+      aiClassification: {
+        confidence: 0.87,
+        extractedSpecies: ['pigeon'],
+        urgencyKeywords: ['injured', 'wound'],
+        needsManualReview: false
+      },
       mediaUrls: [],
       timeline: [{
         action: 'created',
-        timestamp: new Date(),
-        performedBy: 'Demo Reporter',
+        timestamp: new Date('2025-11-27T10:00:00+05:30'),
+        performedBy: 'Citizen Reporter 1',
         details: 'Case created via WhatsApp'
-      }]
+      }],
+      createdAt: new Date('2025-11-27T10:00:00+05:30')
     });
 
     // Demo case 2: Voice case (English)
+    const phone2 = '+919812340002';
     const voiceCaseEn = await Report.create({
       caseId: 'WR-DEMO-VOICE-EN-001',
-      reporterId: reporterUser._id,
+      reporterId: reporter2._id,
       source: 'voice',
-      language: 'en',
-      phoneMasked: maskedPhone,
-      phoneEncrypted: encryptedPhone,
+      language: 'English',
+      phoneMasked: maskPhoneNumber(phone2),
+      phoneEncrypted: encryptField(phone2),
       category: 'injured_animal',
       location: {
-        coordinates: { latitude: 40.7489, longitude: -73.9680 },
-        address: 'Central Park, New York, NY',
-        description: 'Near Bethesda Fountain',
-        district: 'Manhattan',
-        latEncrypted: encryptField('40.7489'),
-        lngEncrypted: encryptField('-73.9680')
+        coordinates: { latitude: 12.3051, longitude: 76.6553 },
+        address: 'Old Market, Mysuru',
+        description: 'Near the blue gate',
+        district: 'Mysuru',
+        latEncrypted: encryptField('12.3051'),
+        lngEncrypted: encryptField('76.6553')
       },
-      description: 'Injured hawk with broken wing spotted near Bethesda Fountain in Central Park',
+      description: 'There is a dog on the main road near the petrol pump. It looks like it got hit by a bike. The dog is bleeding from its left hind leg and cannot stand. Location: Old Market, near the blue gate. Please send help.',
       transcript: {
-        partial: 'There is an injured hawk...',
-        final: 'There is an injured hawk near Bethesda Fountain in Central Park. It has a broken wing and cannot fly. The bird seems to be in pain.',
+        partial: 'There is a dog on the main road...',
+        final: 'There is a dog on the main road near the petrol pump. It looks like it got hit by a bike. The dog is bleeding from its left hind leg and cannot stand. Location: Old Market, near the blue gate. Please send help.',
         segments: [
-          { text: 'There is an injured hawk', timestamp: 0, confidence: 0.95 },
-          { text: 'near Bethesda Fountain in Central Park', timestamp: 2000, confidence: 0.92 },
-          { text: 'It has a broken wing and cannot fly', timestamp: 5000, confidence: 0.94 },
-          { text: 'The bird seems to be in pain', timestamp: 8000, confidence: 0.91 }
+          { text: 'There is a dog on the main road near the petrol pump', timestamp: 0, confidence: 0.94 },
+          { text: 'It looks like it got hit by a bike', timestamp: 3200, confidence: 0.91 },
+          { text: 'The dog is bleeding from its left hind leg and cannot stand', timestamp: 5800, confidence: 0.93 },
+          { text: 'Location: Old Market, near the blue gate', timestamp: 9100, confidence: 0.89 },
+          { text: 'Please send help', timestamp: 11500, confidence: 0.96 }
         ],
         audioClipUrl: '/static/demo-audio/demo-voice-en-001.mp3'
       },
       status: 'pending',
       priority: 'high',
+      aiClassification: {
+        confidence: 0.92,
+        extractedSpecies: ['dog'],
+        urgencyKeywords: ['bleeding', 'hit', 'cannot stand'],
+        needsManualReview: false
+      },
       mediaUrls: [],
       timeline: [{
         action: 'created',
-        timestamp: new Date(),
-        performedBy: 'Demo Reporter',
+        timestamp: new Date('2025-11-28T09:12:30+05:30'),
+        performedBy: 'Citizen Reporter 2',
         details: 'Case created via voice call'
-      }]
+      }],
+      createdAt: new Date('2025-11-28T09:12:30+05:30')
     });
 
     // Demo case 3: Voice case (Hindi)
+    const phone3 = '+919812340003';
     const voiceCaseHi = await Report.create({
       caseId: 'WR-DEMO-VOICE-HI-001',
-      reporterId: reporterUser._id,
+      reporterId: reporter3._id,
       source: 'voice',
-      language: 'hi',
-      phoneMasked: maskedPhone,
-      phoneEncrypted: encryptedPhone,
-      category: 'human_wildlife_conflict',
+      language: 'Hindi',
+      phoneMasked: maskPhoneNumber(phone3),
+      phoneEncrypted: encryptField(phone3),
+      category: 'predator_sighting',
       location: {
-        coordinates: { latitude: 40.7614, longitude: -73.9776 },
-        address: 'Upper West Side, New York, NY',
-        description: 'Residential area near park',
-        district: 'Manhattan',
-        latEncrypted: encryptField('40.7614'),
-        lngEncrypted: encryptField('-73.9776')
+        coordinates: { latitude: 15.3647, longitude: 75.1240 },
+        address: 'Laxmi Chowk, Hubballi',
+        description: 'Behind Laxmi Chowk, near the fields',
+        district: 'Hubballi-Dharwad',
+        latEncrypted: encryptField('15.3647'),
+        lngEncrypted: encryptField('75.1240')
       },
-      description: 'Leopard spotted in residential area causing panic among residents',
+      description: 'Aaj subah ek bhediya road ke paas nazar aaya. Location: Laxmi Chowk ke piche wale khet ke paas. Bhediya shayad chot mein nahi dikh raha tha par bahut paas se guzra. Bachchon ko school se bol do ki raasta avoid karein. Kripya forest department ko inform karein.',
       transcript: {
-        partial: 'एक तेंदुआ...',
-        final: 'एक तेंदुआ रिहायशी इलाके में देखा गया है। लोग बहुत डरे हुए हैं। कृपया जल्दी आएं।',
+        partial: 'Aaj subah ek bhediya...',
+        final: 'Aaj subah ek bhediya road ke paas nazar aaya. Location: Laxmi Chowk ke piche wale khet ke paas. Bhediya shayad chot mein nahi dikh raha tha par bahut paas se guzra. Bachchon ko school se bol do ki raasta avoid karein. Kripya forest department ko inform karein.',
         segments: [
-          { text: 'एक तेंदुआ रिहायशी इलाके में देखा गया है', timestamp: 0, confidence: 0.89 },
-          { text: 'लोग बहुत डरे हुए हैं', timestamp: 3000, confidence: 0.92 },
-          { text: 'कृपया जल्दी आएं', timestamp: 5500, confidence: 0.94 }
+          { text: 'Aaj subah ek bhediya road ke paas nazar aaya', timestamp: 0, confidence: 0.88 },
+          { text: 'Location: Laxmi Chowk ke piche wale khet ke paas', timestamp: 3500, confidence: 0.85 },
+          { text: 'Bhediya shayad chot mein nahi dikh raha tha par bahut paas se guzra', timestamp: 7200, confidence: 0.82 },
+          { text: 'Bachchon ko school se bol do ki raasta avoid karein', timestamp: 11800, confidence: 0.90 },
+          { text: 'Kripya forest department ko inform karein', timestamp: 15200, confidence: 0.93 }
         ],
         audioClipUrl: '/static/demo-audio/demo-voice-hi-001.mp3'
       },
       status: 'pending',
-      priority: 'critical',
+      priority: 'high',
+      aiClassification: {
+        confidence: 0.79,
+        extractedSpecies: ['wolf'],
+        urgencyKeywords: ['bhediya', 'bachchon', 'school'],
+        needsManualReview: true
+      },
       mediaUrls: [],
       timeline: [{
         action: 'created',
-        timestamp: new Date(),
-        performedBy: 'Demo Reporter',
+        timestamp: new Date('2025-11-28T07:45:10+05:30'),
+        performedBy: 'Citizen Reporter 3',
         details: 'Case created via voice call (Hindi)'
-      }]
+      }],
+      createdAt: new Date('2025-11-28T07:45:10+05:30')
     });
 
     logger.info('Demo data seeded successfully', {
       cases: [whatsappCase.caseId, voiceCaseEn.caseId, voiceCaseHi.caseId],
-      users: [adminUser.email, responderUser.email]
+      users: [adminUser.email],
+      responders: [raviKumar.name, meenaPatel.name]
     });
 
     res.json({
       message: 'Demo data seeded successfully',
       cases: [
-        { caseId: whatsappCase.caseId, source: 'whatsapp' },
-        { caseId: voiceCaseEn.caseId, source: 'voice', language: 'en' },
-        { caseId: voiceCaseHi.caseId, source: 'voice', language: 'hi' }
+        { caseId: whatsappCase.caseId, source: 'whatsapp', language: 'English' },
+        { caseId: voiceCaseEn.caseId, source: 'voice', language: 'English' },
+        { caseId: voiceCaseHi.caseId, source: 'voice', language: 'Hindi' }
       ],
       users: {
-        admin: { email: 'admin@wildlife-demo.local', password: 'demo123' },
-        responder: { email: 'responder@wildlife-demo.local', password: 'demo123' }
+        admin: { email: 'admin@wildlife-demo.local', password: 'demo123' }
       },
+      responders: [
+        { name: raviKumar.name, organization: raviKumar.organization, district: 'Gurugram' },
+        { name: meenaPatel.name, organization: meenaPatel.organization, district: 'Mysuru' }
+      ],
       audioFiles: [
         '/static/demo-audio/demo-voice-en-001.mp3',
         '/static/demo-audio/demo-voice-hi-001.mp3'

@@ -17,10 +17,13 @@ async function seedDemo() {
       console.log('✓ Demo data seeded successfully');
       console.log('\nDemo Users:');
       console.log(`  Admin: ${response.data.users.admin.email} / ${response.data.users.admin.password}`);
-      console.log(`  Responder: ${response.data.users.responder.email} / ${response.data.users.responder.password}`);
+      console.log('\nDemo Responders:');
+      response.data.responders.forEach(r => {
+        console.log(`  - ${r.name} (${r.organization}) - ${r.district}`);
+      });
       console.log('\nDemo Cases:');
       response.data.cases.forEach(c => {
-        console.log(`  - ${c.caseId} (${c.source}${c.language ? `, ${c.language}` : ''})`);
+        console.log(`  - ${c.caseId} (${c.source}, ${c.language})`);
       });
     }
 

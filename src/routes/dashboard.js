@@ -1,6 +1,9 @@
 const express = require('express');
 const Report = require('../models/Report');
 const Responder = require('../models/Responder');
+const Geofence = require('../models/Geofence');
+const Escalation = require('../models/Escalation');
+const Audit = require('../models/Audit');
 const { verifyToken, requireRole } = require('../middleware/auth');
 const { maskPhoneNumber, decryptField } = require('../utils/encryption');
 const logger = require('../utils/logger');
@@ -242,6 +245,219 @@ router.post('/reports/:caseId/resolve', requireRole('RESPONDER', 'ADMIN'), async
   } catch (error) {
     logger.error('Failed to resolve case', { error: error.message });
     res.status(500).json({ error: 'Failed to resolve case' });
+  }
+});
+
+/**
+ * Presence - Responder heartbeat
+ */
+router.post('/presence/ping', requireRole('RESPONDER', 'ADMIN'), async (req, res) => {
+  try {
+    const { responderId, coords } = req.body;
+    
+    const responder = await Responder.findById(responderId || req.user.responderId);
+    
+    if (!responder) {
+      return res.status(404).json({ error: 'Responder not found' });
+    }
+    
+    responder.lastSeen = new Date();
+    responder.status = 'online';
+    
+    if (coords && coords.lat && coords.lng) {
+      responder.location = responder.location || {};
+      responder.location.coordinates = {
+        latitude: coords.lat,
+        longitude: coords.lng
+      };
+    }
+    
+    await responder.save();
+    
+    res.json({ success: true, lastSeen: responder.lastSeen });
+  } catch (error) {
+    logger.error('Presence ping failed', { error: error.message });
+    res.status(500).json({ error: 'Failed to update presence' });
+  }
+});
+
+/**
+ * Get online responders
+ */
+router.get('/responders/online', async (req, res) => {
+  try {
+    const onlineThreshold = new Date(Date.now() - 90000); // 90 seconds
+    
+    const responders = await Responder.find({
+      lastSeen: { $gte: onlineThreshold },
+      isActive: true
+    }).select('name organization categoriesHandled status lastSeen currentCases whatsappNumber');
+    
+    const maskedResponders = responders.map(r => {
+      const obj = r.toObject();
+      obj.maskedPhone = maskPhoneNumber(obj.whatsappNumber);
+      delete obj.whatsappNumber;
+      obj.currentCasesCount = obj.currentCases?.length || 0;
+      delete obj.currentCases;
+      return obj;
+    });
+    
+    res.json(maskedResponders);
+  } catch (error) {
+    logger.error('Failed to fetch online responders', { error: error.message });
+    res.status(500).json({ error: 'Failed to fetch responders' });
+  }
+});
+
+/**
+ * Get all responders (admin only)
+ */
+router.get('/responders', requireRole('ADMIN'), async (req, res) => {
+  try {
+    const responders = await Responder.find({ isActive: true })
+      .populate('currentCases', 'caseId status priority')
+      .sort({ name: 1 });
+    
+    res.json(responders);
+  } catch (error) {
+    logger.error('Failed to fetch responders', { error: error.message });
+    res.status(500).json({ error: 'Failed to fetch responders' });
+  }
+});
+
+/**
+ * Get suggested responders for a case
+ */
+router.get('/cases/:id/suggested-responders', async (req, res) => {
+  try {
+    const report = await Report.findOne({ caseId: req.params.id });
+    
+    if (!report) {
+      return res.status(404).json({ error: 'Case not found' });
+    }
+    
+    const onlineThreshold = new Date(Date.now() - 90000);
+    
+    // Find responders matching category and online
+    const responders = await Responder.find({
+      categoriesHandled: report.category,
+      status: 'online',
+      lastSeen: { $gte: onlineThreshold },
+      isActive: true
+    }).populate('currentCases', 'caseId');
+    
+    // Filter by availability and compute distance
+    const suggestions = responders
+      .filter(r => r.currentCases.length < r.maxConcurrentCases)
+      .map(r => {
+        const obj = r.toObject();
+        obj.availability = `${r.currentCases.length}/${r.maxConcurrentCases}`;
+        obj.distance = null; // TODO: compute actual distance if coords available
+        return obj;
+      })
+      .sort((a, b) => a.currentCases.length - b.currentCases.length);
+    
+    res.json(suggestions);
+  } catch (error) {
+    logger.error('Failed to fetch suggested responders', { error: error.message });
+    res.status(500).json({ error: 'Failed to fetch suggestions' });
+  }
+});
+
+/**
+ * Geofences - List
+ */
+router.get('/geofences', async (req, res) => {
+  try {
+    const geofences = await Geofence.find({ isActive: true })
+      .populate('createdBy', 'name')
+      .sort({ createdAt: -1 });
+    
+    res.json(geofences);
+  } catch (error) {
+    logger.error('Failed to fetch geofences', { error: error.message });
+    res.status(500).json({ error: 'Failed to fetch geofences' });
+  }
+});
+
+/**
+ * Geofences - Create (admin only)
+ */
+router.post('/geofences', requireRole('ADMIN'), async (req, res) => {
+  try {
+    const { name, polygon, notifyOnEntry } = req.body;
+    
+    if (!name || !polygon || !polygon.coordinates) {
+      return res.status(400).json({ error: 'Name and polygon coordinates required' });
+    }
+    
+    const geofence = new Geofence({
+      name,
+      polygon: {
+        type: 'Polygon',
+        coordinates: polygon.coordinates
+      },
+      notifyOnEntry: notifyOnEntry !== false,
+      createdBy: req.user.id
+    });
+    
+    await geofence.save();
+    
+    await Audit.createLog({
+      actorId: req.user.id,
+      action: 'geofence_created',
+      targetId: geofence._id.toString(),
+      targetType: 'Geofence',
+      details: { name },
+      ip: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+    
+    res.status(201).json(geofence);
+  } catch (error) {
+    logger.error('Failed to create geofence', { error: error.message });
+    res.status(500).json({ error: 'Failed to create geofence' });
+  }
+});
+
+/**
+ * Dashboard stats
+ */
+router.get('/stats', async (req, res) => {
+  try {
+    const now = new Date();
+    const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    
+    const [totalOpen, new24h, highPriority, allCases] = await Promise.all([
+      Report.countDocuments({ status: { $in: ['pending', 'accepted', 'in_progress'] } }),
+      Report.countDocuments({ createdAt: { $gte: last24h } }),
+      Report.countDocuments({ priority: { $in: ['high', 'critical'] }, status: { $ne: 'resolved' } }),
+      Report.find({ status: 'accepted', updatedAt: { $exists: true } })
+        .select('createdAt updatedAt')
+        .limit(100)
+    ]);
+    
+    // Calculate average accept time
+    let avgAcceptTime = 0;
+    if (allCases.length > 0) {
+      const acceptTimes = allCases
+        .filter(c => c.updatedAt && c.createdAt)
+        .map(c => (c.updatedAt - c.createdAt) / 1000 / 60); // minutes
+      
+      if (acceptTimes.length > 0) {
+        avgAcceptTime = Math.round(acceptTimes.reduce((a, b) => a + b, 0) / acceptTimes.length);
+      }
+    }
+    
+    res.json({
+      totalOpen,
+      new24h,
+      highPriority,
+      avgAcceptTime
+    });
+  } catch (error) {
+    logger.error('Failed to fetch stats', { error: error.message });
+    res.status(500).json({ error: 'Failed to fetch stats' });
   }
 });
 

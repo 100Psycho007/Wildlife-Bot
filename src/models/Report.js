@@ -25,7 +25,7 @@ const reportSchema = new mongoose.Schema({
   phoneEncrypted: String,
   category: {
     type: String,
-    enum: ['animal_sighting', 'injured_animal', 'abandoned_pet', 'human_wildlife_conflict', 'other'],
+    enum: ['animal_sighting', 'injured_animal', 'abandoned_pet', 'human_wildlife_conflict', 'predator_sighting', 'other'],
     required: true
   },
   location: {
