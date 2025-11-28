@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const PNG = require('pngjs').PNG;
 const pixelmatch = require('pixelmatch');
+const fetch = require('node-fetch');
 
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const REFERENCE_DIR = path.join(__dirname, '../static/demo-ui-frames');
@@ -53,6 +54,24 @@ async function runPixelCheck() {
   console.log(`Frontend URL: ${FRONTEND_URL}`);
   console.log(`Threshold: ${THRESHOLD * 100}%\n`);
 
+  // Check if frontend is accessible
+  console.log('Checking if frontend is running...');
+  try {
+    const response = await fetch(FRONTEND_URL);
+    if (!response.ok) {
+      throw new Error(`Frontend returned status ${response.status}`);
+    }
+    console.log('✓ Frontend is accessible\n');
+  } catch (error) {
+    console.error('❌ Cannot connect to frontend at', FRONTEND_URL);
+    console.error('\nPlease ensure:');
+    console.error('1. Frontend is running: cd client && npm run dev');
+    console.error('2. Frontend is accessible at http://localhost:5173');
+    console.error('3. Backend is running: npm run dev');
+    console.error('4. Demo data is seeded: npm run seed:demo\n');
+    process.exit(1);
+  }
+
   const browser = await puppeteer.launch({
     headless: 'new',
     args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -64,11 +83,18 @@ async function runPixelCheck() {
 
     // Login first
     console.log('Step 1: Logging in...');
-    await page.goto(`${FRONTEND_URL}/login`, { waitUntil: 'networkidle0' });
+    try {
+      await page.goto(`${FRONTEND_URL}/login`, { waitUntil: 'networkidle0', timeout: 10000 });
+    } catch (error) {
+      console.error('❌ Failed to load login page');
+      console.error('Make sure frontend is running on port 5173');
+      throw error;
+    }
+    
     await page.type('input[type="email"]', 'admin@wildlife-demo.local');
     await page.type('input[type="password"]', 'demo123');
     await page.click('button[type="submit"]');
-    await page.waitForNavigation({ waitUntil: 'networkidle0' });
+    await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 10000 });
     console.log('✓ Logged in successfully\n');
 
     const screenshots = [
