@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Login from './pages/Login';
-import DashboardNew from './pages/DashboardNew';
+import DashboardPixelPerfect from './pages/DashboardPixelPerfect';
 import { AuthContext } from './context/AuthContext';
 
 function App() {
@@ -37,7 +37,7 @@ function App() {
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
-      {user ? <DashboardNew /> : <Login />}
+      {user ? <DashboardPixelPerfect /> : <Login />}
     </AuthContext.Provider>
   );
 }

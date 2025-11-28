@@ -310,15 +310,31 @@ router.get('/responders/online', async (req, res) => {
 });
 
 /**
- * Get all responders (admin only)
+ * Get all responders with filtering
  */
-router.get('/responders', requireRole('ADMIN'), async (req, res) => {
+router.get('/responders', async (req, res) => {
   try {
-    const responders = await Responder.find({ isActive: true })
+    const { status, role } = req.query;
+    const filter = { isActive: true };
+    
+    if (status) filter.status = status;
+    if (role) filter.role = role;
+    
+    const responders = await Responder.find(filter)
       .populate('currentCases', 'caseId status priority')
       .sort({ name: 1 });
     
-    res.json(responders);
+    const maskedResponders = responders.map(r => {
+      const obj = r.toObject();
+      obj.activeCases = obj.currentCases?.length || 0;
+      if (req.user?.role !== 'ADMIN') {
+        obj.maskedPhone = maskPhoneNumber(obj.whatsappNumber);
+        delete obj.whatsappNumber;
+      }
+      return obj;
+    });
+    
+    res.json({ responders: maskedResponders });
   } catch (error) {
     logger.error('Failed to fetch responders', { error: error.message });
     res.status(500).json({ error: 'Failed to fetch responders' });
@@ -428,10 +444,11 @@ router.get('/stats', async (req, res) => {
     const now = new Date();
     const last24h = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     
-    const [totalOpen, new24h, highPriority, allCases] = await Promise.all([
-      Report.countDocuments({ status: { $in: ['pending', 'accepted', 'in_progress'] } }),
-      Report.countDocuments({ createdAt: { $gte: last24h } }),
+    const [total, active, critical, resolved, allCases] = await Promise.all([
+      Report.countDocuments({}),
+      Report.countDocuments({ status: { $in: ['accepted', 'in_progress'] } }),
       Report.countDocuments({ priority: { $in: ['high', 'critical'] }, status: { $ne: 'resolved' } }),
+      Report.countDocuments({ status: 'resolved' }),
       Report.find({ status: 'accepted', updatedAt: { $exists: true } })
         .select('createdAt updatedAt')
         .limit(100)
@@ -450,9 +467,10 @@ router.get('/stats', async (req, res) => {
     }
     
     res.json({
-      totalOpen,
-      new24h,
-      highPriority,
+      total,
+      active,
+      critical,
+      resolved,
       avgAcceptTime
     });
   } catch (error) {

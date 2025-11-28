@@ -34,42 +34,92 @@ router.post('/demo-voice-cases', async (req, res) => {
       });
     }
 
-    // Create demo responders
-    let raviKumar = await Responder.findOne({ whatsappNumber: '+919876543001' });
-    if (!raviKumar) {
-      raviKumar = await Responder.create({
-        name: 'Ravi Kumar',
+    // Create demo responders (Indian locations)
+    let amitPatel = await Responder.findOne({ whatsappNumber: '+919876543001' });
+    if (!amitPatel) {
+      amitPatel = await Responder.create({
+        name: 'Amit Patel',
         whatsappNumber: '+919876543001',
-        email: 'ravi.kumar@rescue.in',
-        organization: 'Gurugram Animal Rescue',
+        email: 'amit.patel@wildlifengo.in',
+        organization: 'Wildlife Conservation NGO',
+        role: 'NGO',
         categoriesHandled: ['injured_animal'],
+        expertise: ['wildlife_rescue', 'exotic_animals'],
         location: {
-          coordinates: { latitude: 28.4595, longitude: 77.0266 },
-          address: 'Gurugram, Haryana',
+          coordinates: { latitude: 12.9716, longitude: 77.5946 },
+          address: 'Bengaluru Urban, Karnataka',
+          district: 'Bengaluru Urban',
           serviceRadius: 30
         },
-        status: 'online',
+        status: 'AVAILABLE',
         isActive: true,
-        lastSeen: new Date()
+        lastSeen: new Date('2025-10-01T02:26:00+05:30')
       });
     }
 
-    let meenaPatel = await Responder.findOne({ whatsappNumber: '+919876543002' });
-    if (!meenaPatel) {
-      meenaPatel = await Responder.create({
-        name: 'Dr. Meena Patel',
+    let drRajeshKumar = await Responder.findOne({ whatsappNumber: '+919876543002' });
+    if (!drRajeshKumar) {
+      drRajeshKumar = await Responder.create({
+        name: 'Dr. Rajesh Kumar',
         whatsappNumber: '+919876543002',
-        email: 'meena.patel@wildlife.in',
-        organization: 'Mysore Wildlife Rescue',
+        email: 'rajesh.kumar@rescue.in',
+        organization: 'Wildlife Rescue Foundation',
+        role: 'RESPONDER',
         categoriesHandled: ['predator_sighting', 'injured_animal'],
+        expertise: ['wildlife_rescue', 'veterinary'],
         location: {
-          coordinates: { latitude: 12.2958, longitude: 76.6394 },
+          coordinates: { latitude: 12.3051, longitude: 76.6553 },
           address: 'Mysuru, Karnataka',
+          district: 'Mysuru',
           serviceRadius: 40
         },
-        status: 'online',
+        status: 'AVAILABLE',
         isActive: true,
-        lastSeen: new Date()
+        lastSeen: new Date('2025-10-01T02:26:00+05:30')
+      });
+    }
+
+    let priyaSharma = await Responder.findOne({ whatsappNumber: '+919876543003' });
+    if (!priyaSharma) {
+      priyaSharma = await Responder.create({
+        name: 'Priya Sharma',
+        whatsappNumber: '+919876543003',
+        email: 'priya.sharma@forest.gov.in',
+        organization: 'Forest Department',
+        role: 'FOREST_OFFICIAL',
+        categoriesHandled: ['predator_sighting', 'injured_animal'],
+        expertise: ['forest_management', 'predator_handling'],
+        location: {
+          coordinates: { latitude: 15.3647, longitude: 75.1240 },
+          address: 'Hubballi-Dharwad, Karnataka',
+          district: 'Hubballi-Dharwad',
+          serviceRadius: 50
+        },
+        status: 'AVAILABLE',
+        isActive: true,
+        lastSeen: new Date('2025-10-01T02:26:00+05:30')
+      });
+    }
+
+    let systemAdmin = await Responder.findOne({ whatsappNumber: '+919800000000' });
+    if (!systemAdmin) {
+      systemAdmin = await Responder.create({
+        name: 'System Administrator',
+        whatsappNumber: '+919800000000',
+        email: 'admin@wildlife-demo.local',
+        organization: 'Wildlife Emergency Response',
+        role: 'ADMIN',
+        categoriesHandled: ['injured_animal', 'predator_sighting'],
+        expertise: ['wildlife_rescue', 'veterinary', 'forest_management'],
+        location: {
+          coordinates: { latitude: 12.9716, longitude: 77.5946 },
+          address: 'Bengaluru Urban, Karnataka',
+          district: 'Bengaluru Urban',
+          serviceRadius: 100
+        },
+        status: 'AVAILABLE',
+        isActive: true,
+        lastSeen: new Date('2025-10-01T02:34:00+05:30')
       });
     }
 
@@ -239,7 +289,7 @@ router.post('/demo-voice-cases', async (req, res) => {
     logger.info('Demo data seeded successfully', {
       cases: [whatsappCase.caseId, voiceCaseEn.caseId, voiceCaseHi.caseId],
       users: [adminUser.email],
-      responders: [raviKumar.name, meenaPatel.name]
+      responders: [amitPatel.name, drRajeshKumar.name, priyaSharma.name, systemAdmin.name]
     });
 
     res.json({
@@ -253,8 +303,10 @@ router.post('/demo-voice-cases', async (req, res) => {
         admin: { email: 'admin@wildlife-demo.local', password: 'demo123' }
       },
       responders: [
-        { name: raviKumar.name, organization: raviKumar.organization, district: 'Gurugram' },
-        { name: meenaPatel.name, organization: meenaPatel.organization, district: 'Mysuru' }
+        { name: amitPatel.name, organization: amitPatel.organization, district: 'Bengaluru Urban' },
+        { name: drRajeshKumar.name, organization: drRajeshKumar.organization, district: 'Mysuru' },
+        { name: priyaSharma.name, organization: priyaSharma.organization, district: 'Hubballi-Dharwad' },
+        { name: systemAdmin.name, organization: systemAdmin.organization, district: 'Bengaluru Urban' }
       ],
       audioFiles: [
         '/static/demo-audio/demo-voice-en-001.mp3',
