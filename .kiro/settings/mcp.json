@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "mongodb": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mongodb-mcp-server",
+        "--connectionString",
+        "mongodb+srv://Gogeta:Gogeta007@cluster0.qa2ucyu.mongodb.net/"
+      ],
+      "disabled": false,
+      "autoApprove": [
+        "list_databases",
+        "list_collections",
+        "find",
+        "aggregate",
+        "insert_one",
+        "insert_many",
+        "update_one",
+        "update_many",
+        "delete_one",
+        "delete_many",
+        "count",
+        "collection_schema",
+        "collection_indexes",
+        "create_index"
+      ]
+    }
+  }
+}

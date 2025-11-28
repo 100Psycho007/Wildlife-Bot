@@ -8,7 +8,7 @@ class Database {
 
   async connect() {
     try {
-      const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/wildlife_reports';
+      const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/wildlife_reports';
       
       const options = {
         useNewUrlParser: true,

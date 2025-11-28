@@ -4,6 +4,16 @@ A comprehensive WhatsApp bot system for reporting and managing wildlife incident
 
 ## Features
 
+### 🖥️ Responder Dashboard (NEW)
+- **Web Interface**: Secure dashboard for responders and admins
+- **Multi-Source Support**: View cases from WhatsApp and Voice calls
+- **Voice Transcripts**: Play audio and view transcripts for voice reports
+- **Role-Based Access**: Admin and Responder roles with proper data masking
+- **Real-time Filters**: Filter by source, status, priority, language
+- **Case Management**: Accept and resolve cases directly from dashboard
+
+See [DASHBOARD_DEMO_GUIDE.md](./DASHBOARD_DEMO_GUIDE.md) for complete dashboard documentation.
+
 ### 🤖 WhatsApp Bot Capabilities
 - **Guided Conversation Flow**: Step-by-step incident reporting
 - **Category Selection**: Animal sighting, injured animal, abandoned pet, human-wildlife conflict, other
@@ -88,6 +98,11 @@ Copy the HTTPS forwarding URL.
 git clone <repository-url>
 cd wildlife-whatsapp-bot
 npm install
+
+# Install frontend dependencies
+cd client
+npm install
+cd ..
 ```
 
 2. **Environment Setup**

@@ -8,6 +8,13 @@ const userSchema = new mongoose.Schema({
     index: true
   },
   name: { type: String, default: '' },
+  email: String,
+  password: String, // For dashboard users only
+  role: {
+    type: String,
+    enum: ['USER', 'RESPONDER', 'ADMIN'],
+    default: 'USER'
+  },
   contactInfo: { email: String, alternatePhone: String },
   conversationState: {
     type: String,

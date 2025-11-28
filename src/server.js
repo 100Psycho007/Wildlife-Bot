@@ -2,9 +2,13 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const database = require('./config/database');
 const webhookRoutes = require('./routes/webhook');
 const apiRoutes = require('./routes/api');
+const authRoutes = require('./routes/auth');
+const dashboardRoutes = require('./routes/dashboard');
+const seedRoutes = require('./routes/seed');
 const scheduler = require('./jobs/scheduler');
 const logger = require('./utils/logger');
 
@@ -15,6 +19,9 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files
+app.use('/static', express.static(path.join(__dirname, '../static')));
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -33,6 +40,9 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/webhook', webhookRoutes);
 app.use('/api', apiRoutes);
+app.use('/auth', authRoutes);
+app.use('/dashboard', dashboardRoutes);
+app.use('/seed', seedRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

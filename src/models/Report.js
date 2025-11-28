@@ -12,6 +12,17 @@ const reportSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  source: {
+    type: String,
+    enum: ['whatsapp', 'voice'],
+    default: 'whatsapp'
+  },
+  language: {
+    type: String,
+    default: 'en'
+  },
+  phoneMasked: String,
+  phoneEncrypted: String,
   category: {
     type: String,
     enum: ['animal_sighting', 'injured_animal', 'abandoned_pet', 'human_wildlife_conflict', 'other'],
@@ -23,7 +34,20 @@ const reportSchema = new mongoose.Schema({
       longitude: Number
     },
     address: String,
-    description: String
+    description: String,
+    district: String,
+    latEncrypted: String,
+    lngEncrypted: String
+  },
+  transcript: {
+    partial: String,
+    final: String,
+    segments: [{
+      text: String,
+      timestamp: Number,
+      confidence: Number
+    }],
+    audioClipUrl: String
   },
   description: {
     type: String,
