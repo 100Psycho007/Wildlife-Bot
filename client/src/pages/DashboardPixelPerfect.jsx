@@ -4,6 +4,7 @@ import api from '../utils/api';
 import CaseCard from '../components/CaseCard';
 import MapView from '../components/MapView';
 import RespondersList from '../components/RespondersList';
+import GeofenceManager from '../components/GeofenceManager';
 import '../styles/ui-tokens.css';
 
 function DashboardPixelPerfect() {
@@ -31,8 +32,8 @@ function DashboardPixelPerfect() {
 
   const applyFilter = (filter) => {
     let filtered = [...cases];
-    
-    switch(filter) {
+
+    switch (filter) {
       case 'pending':
         filtered = cases.filter(c => c.status === 'pending');
         break;
@@ -46,7 +47,7 @@ function DashboardPixelPerfect() {
       default:
         filtered = cases;
     }
-    
+
     setFilteredCases(filtered);
   };
 
@@ -61,18 +62,18 @@ function DashboardPixelPerfect() {
         api.get('/dashboard/reports'),
         api.get('/dashboard/stats')
       ]);
-      
+
       const casesData = casesRes.data.reports || [];
       setCases(casesData.map(c => ({
         ...c,
-        preview: c.source === 'voice' && c.transcript?.final 
+        preview: c.source === 'voice' && c.transcript?.final
           ? c.transcript.final.substring(0, 80) + '...'
           : c.description?.substring(0, 80) + '...' || 'No description',
-        confidence: c.aiClassification?.confidence 
+        confidence: c.aiClassification?.confidence
           ? Math.round(c.aiClassification.confidence * 100)
           : Math.floor(Math.random() * 30) + 70
       })));
-      
+
       setStats({
         total: statsRes.data.total || casesData.length,
         active: statsRes.data.active || casesData.filter(c => c.status === 'accepted' || c.status === 'in_progress').length,
@@ -177,11 +178,28 @@ function DashboardPixelPerfect() {
         >
           👥 RESPONDERS
         </button>
+        <button
+          onClick={() => setActiveView('geofences')}
+          style={{
+            background: activeView === 'geofences' ? 'rgba(255,255,255,0.2)' : 'transparent',
+            border: 'none',
+            color: 'white',
+            padding: '8px 16px',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}
+        >
+          🛡️ GEOFENCES
+        </button>
         <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.3)' }}></div>
         <button style={{ background: 'transparent', border: 'none', color: 'white', fontSize: '18px', cursor: 'pointer' }}>
           🔔
         </button>
-        <button 
+        <button
           onClick={logout}
           style={{ background: 'transparent', border: 'none', color: 'white', fontSize: '18px', cursor: 'pointer' }}
         >
@@ -313,7 +331,7 @@ function DashboardPixelPerfect() {
           </p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button 
+          <button
             onClick={() => handleFilterChange('all')}
             style={{
               background: activeFilter === 'all' ? '#2563eb' : 'white',
@@ -327,7 +345,7 @@ function DashboardPixelPerfect() {
             }}>
             All
           </button>
-          <button 
+          <button
             onClick={() => handleFilterChange('pending')}
             style={{
               background: activeFilter === 'pending' ? '#2563eb' : 'white',
@@ -341,7 +359,7 @@ function DashboardPixelPerfect() {
             }}>
             Pending
           </button>
-          <button 
+          <button
             onClick={() => handleFilterChange('voice')}
             style={{
               background: activeFilter === 'voice' ? '#2563eb' : 'white',
@@ -355,7 +373,7 @@ function DashboardPixelPerfect() {
             }}>
             Voice Only
           </button>
-          <button 
+          <button
             onClick={() => handleFilterChange('critical')}
             style={{
               background: activeFilter === 'critical' ? '#2563eb' : 'white',
@@ -416,8 +434,8 @@ function DashboardPixelPerfect() {
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h2 style={{ fontSize: '18px', fontWeight: '600', margin: 0 }}>Recent Active Cases</h2>
-            <a 
-              href="#" 
+            <a
+              href="#"
               onClick={(e) => { e.preventDefault(); setActiveView('cases'); }}
               style={{ color: '#2563eb', fontSize: '14px', textDecoration: 'none', cursor: 'pointer' }}
             >
@@ -454,7 +472,7 @@ function DashboardPixelPerfect() {
           }}>
             <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '16px' }}>Quick Actions</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <button 
+              <button
                 onClick={() => setActiveView('cases')}
                 style={{
                   background: '#22c55e',
@@ -473,7 +491,7 @@ function DashboardPixelPerfect() {
               >
                 📋 VIEW ALL CASES
               </button>
-              <button 
+              <button
                 onClick={() => {
                   setActiveView('cases');
                   setActiveFilter('pending');
@@ -495,7 +513,7 @@ function DashboardPixelPerfect() {
               >
                 ⚠️ UNASSIGNED CASES
               </button>
-              <button 
+              <button
                 onClick={() => {
                   setActiveView('cases');
                   setActiveFilter('critical');
@@ -619,9 +637,9 @@ function DashboardPixelPerfect() {
 
   const renderCaseDetailModal = () => {
     if (!selectedCase) return null;
-    
+
     return (
-      <div 
+      <div
         style={{
           position: 'fixed',
           top: 0,
@@ -633,10 +651,10 @@ function DashboardPixelPerfect() {
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000
-        }} 
+        }}
         onClick={() => setSelectedCase(null)}
       >
-        <div 
+        <div
           style={{
             background: 'white',
             borderRadius: '12px',
@@ -646,7 +664,7 @@ function DashboardPixelPerfect() {
             maxHeight: '80vh',
             overflow: 'auto',
             boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
-          }} 
+          }}
           onClick={(e) => e.stopPropagation()}
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '20px' }}>
@@ -668,7 +686,7 @@ function DashboardPixelPerfect() {
                 </span>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => setSelectedCase(null)}
               style={{
                 background: 'transparent',
@@ -699,7 +717,7 @@ function DashboardPixelPerfect() {
               }}>
                 "{selectedCase.transcript.final}"
               </div>
-              
+
               {selectedCase.transcript.englishTranslation && selectedCase.language !== 'English' && (
                 <div style={{ marginTop: '12px' }}>
                   <h4 style={{ fontSize: '13px', fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>
@@ -758,7 +776,7 @@ function DashboardPixelPerfect() {
 
           <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
             {selectedCase.status === 'pending' && (
-              <button 
+              <button
                 onClick={() => {
                   handleAcceptCase(selectedCase.caseId);
                   setSelectedCase(null);
@@ -778,7 +796,7 @@ function DashboardPixelPerfect() {
                 Accept Case
               </button>
             )}
-            <button 
+            <button
               onClick={() => setSelectedCase(null)}
               style={{
                 background: '#f3f4f6',
@@ -803,10 +821,14 @@ function DashboardPixelPerfect() {
   return (
     <div className="app">
       {renderTopNav()}
-      {activeView === 'dashboard' && renderDashboardView()}
-      {activeView === 'cases' && renderCasesView()}
-      {activeView === 'map' && renderMapView()}
-      {activeView === 'responders' && <RespondersList />}
+      <div style={{ flexGrow: 1, overflow: 'auto' }}>
+        {activeView === 'dashboard' ? renderDashboardView() :
+          activeView === 'cases' ? renderCasesView() :
+            activeView === 'map' ? renderMapView() :
+              activeView === 'responders' ? <RespondersList /> :
+                activeView === 'geofences' ? <GeofenceManager /> :
+                  renderDashboardView()}
+      </div>
       {renderCaseDetailModal()}
     </div>
   );

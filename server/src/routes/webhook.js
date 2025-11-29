@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { twiml: { MessagingResponse } } = require("twilio");
-const fetch = require("node-fetch");
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 // POST /webhook/whatsapp (mounted at /webhook in server.js)
 router.post("/whatsapp", async (req, res) => {

@@ -1,0 +1,8 @@
+{
+  "discovery": {
+    "totalDocs": 0,
+    "fields": [],
+    "types": {}
+  },
+  "transformation": "See transformDoc function in script"
+}

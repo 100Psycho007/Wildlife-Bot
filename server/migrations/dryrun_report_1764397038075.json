@@ -1,0 +1,11 @@
+{
+  "timestamp": "2025-11-29T06:17:18.075Z",
+  "totalProcessed": 0,
+  "validDocs": 0,
+  "errorCount": 0,
+  "errors": [],
+  "backupInfo": {
+    "backupCollName": "archive_test_2025-11-29T06-17-17-885Z",
+    "backupFile": "C:\\Users\\psych\\OneDrive\\Desktop\\Wildlife First Responder Whatsapp Bot\\Wildlife-Bot\\server\\migrations\\backup_test_2025-11-29T06-17-17-885Z.json"
+  }
+}

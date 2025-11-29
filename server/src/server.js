@@ -10,6 +10,7 @@ const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard');
 const seedRoutes = require('./routes/seed');
 const transcriptRoutes = require('./routes/transcripts');
+const voiceRoutes = require('./routes/voice');
 const scheduler = require('./jobs/scheduler');
 const logger = require('./utils/logger');
 
@@ -45,6 +46,7 @@ app.use('/auth', authRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/seed', seedRoutes);
 app.use('/api/transcripts', transcriptRoutes);
+app.use('/voice', voiceRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {
@@ -82,19 +84,19 @@ app.use('*', (req, res) => {
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   logger.info('SIGTERM received, shutting down gracefully');
-  
+
   scheduler.stop();
   await database.disconnect();
-  
+
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
   logger.info('SIGINT received, shutting down gracefully');
-  
+
   scheduler.stop();
   await database.disconnect();
-  
+
   process.exit(0);
 });
 
@@ -104,10 +106,10 @@ async function startServer() {
     // Connect to database
     await database.connect();
     await database.createIndexes();
-    
+
     // Start scheduler
     scheduler.start();
-    
+
     // Start HTTP server
     app.listen(PORT, () => {
       logger.info('Server started successfully', {
@@ -116,11 +118,16 @@ async function startServer() {
         nodeVersion: process.version
       });
     });
-    
+
   } catch (error) {
     logger.error('Failed to start server', { error: error.message });
     process.exit(1);
   }
 }
 
-startServer();
+// Start server
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = app;
