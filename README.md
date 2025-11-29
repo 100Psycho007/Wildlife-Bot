@@ -2,21 +2,25 @@
 
 A comprehensive WhatsApp bot system for reporting and managing wildlife incidents with automated routing, AI classification, and real-time notifications.
 
-## 🎯 Repository Structure (v2.0 - Reorganized)
+## 🎯 Repository Structure (v3.0 - Polished & Reorganized)
 
-This repository has been reorganized into a clean, maintainable structure:
+This repository has been reorganized into a clean, professional structure:
 
 ```
 Wildlife-Bot/
-├── server/              # Backend server (Express, MongoDB, WhatsApp bot)
+├── backend/             # Backend server (Express, MongoDB, WhatsApp bot)
 │   ├── src/            # Server source code
 │   ├── scripts/        # Seed and utility scripts
 │   ├── static/         # Demo assets and media
 │   ├── logs/           # Application logs
-│   ├── __tests__/      # Server tests
+│   ├── tests/          # Server tests
 │   └── package.json    # Server dependencies
-├── client/              # Frontend dashboard (React, Vite, Leaflet)
+├── frontend/            # Frontend dashboard (React, Vite, Leaflet)
 │   ├── src/            # Client source code
+│   │   ├── components/ # Reusable UI components
+│   │   ├── pages/      # Page components
+│   │   ├── styles/     # CSS and design tokens
+│   │   └── utils/      # Utility functions
 │   └── package.json    # Client dependencies
 ├── ops/                 # Docker and CI/CD configurations
 ├── archive/             # Historical documentation (archived)
@@ -93,11 +97,11 @@ mongod
 3. **Environment Setup**
 ```bash
 # Copy the example environment file
-cp .env.example server/.env
-# Edit server/.env with your configuration
+cp .env.example backend/.env
+# Edit backend/.env with your configuration
 ```
 
-Required environment variables in `server/.env`:
+Required environment variables in `backend/.env`:
 ```env
 PORT=3000
 NODE_ENV=development
@@ -325,25 +329,28 @@ See `ops/` directory for Docker and docker-compose configurations (coming soon).
 
 ## Migration Notes (v1.0 → v2.0)
 
-### What Changed
-- **File Structure**: Backend moved to `/server`, frontend to `/client`
-- **Scripts**: All scripts now in `/server/scripts`
-- **Static Assets**: Demo assets in `/server/static`
+### What Changed (v3.0)
+- **File Structure**: Backend moved to `/backend`, frontend to `/frontend`
+- **UI/UX**: Completely modernized with professional design system
+- **Scripts**: All scripts now in `/backend/scripts`
+- **Static Assets**: Demo assets in `/backend/static`
 - **Documentation**: Historical docs archived to `/archive`
-- **Package Scripts**: Root package.json has convenience scripts
+- **Package Scripts**: Root package.json updated with new paths
+- **Design System**: New ui-tokens.css with comprehensive design tokens
+- **Animations**: Smooth transitions and micro-interactions throughout
 
 ### What Stayed the Same
 - All API endpoints unchanged
 - Database schema unchanged
-- Environment variables unchanged (just moved to `server/.env`)
+- Environment variables unchanged (just moved to `backend/.env`)
 - WhatsApp bot functionality unchanged
-- Dashboard features unchanged
+- Core dashboard features unchanged
 
 ### How to Update Your Local Setup
 1. Pull the latest changes
 2. Run `npm run install:all` to install dependencies
-3. Move your `.env` file to `server/.env`
-4. Use new scripts: `npm run start:dev` instead of `npm run dev`
+3. Move your `.env` file to `backend/.env`
+4. Use new scripts: `npm run start:dev` (replaces old dev scripts)
 
 ## Contributing
 
