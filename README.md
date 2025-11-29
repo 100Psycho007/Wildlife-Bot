@@ -2,9 +2,33 @@
 
 A comprehensive WhatsApp bot system for reporting and managing wildlife incidents with automated routing, AI classification, and real-time notifications.
 
+## 🎯 Repository Structure (v2.0 - Reorganized)
+
+This repository has been reorganized into a clean, maintainable structure:
+
+```
+Wildlife-Bot/
+├── server/              # Backend server (Express, MongoDB, WhatsApp bot)
+│   ├── src/            # Server source code
+│   ├── scripts/        # Seed and utility scripts
+│   ├── static/         # Demo assets and media
+│   ├── logs/           # Application logs
+│   ├── __tests__/      # Server tests
+│   └── package.json    # Server dependencies
+├── client/              # Frontend dashboard (React, Vite, Leaflet)
+│   ├── src/            # Client source code
+│   └── package.json    # Client dependencies
+├── ops/                 # Docker and CI/CD configurations
+├── archive/             # Historical documentation (archived)
+├── .github/             # GitHub workflows
+├── README.md            # This file
+├── .env.example         # Environment template
+└── package.json         # Root convenience scripts
+```
+
 ## Features
 
-### 🖥️ Responder Dashboard (NEW)
+### 🖥️ Responder Dashboard
 - **Web Interface**: Secure dashboard for responders and admins
 - **Multi-Source Support**: View cases from WhatsApp and Voice calls
 - **Voice Transcripts**: Play audio and view transcripts for voice reports
@@ -41,160 +65,147 @@ See [DASHBOARD_VOICE_INTEGRATION.md](./DASHBOARD_VOICE_INTEGRATION.md) for voice
 - **Timeline Tracking**: Complete audit trail for each case
 - **Performance Optimized**: Proper indexing and query optimization
 
-### 🎯 Advanced Features
-- **AI/NLP Classification**: Automatic incident categorization with confidence scoring
-- **Media Management**: AWS S3 integration for secure file storage
-- **Volunteer Network**: Proximity-based volunteer notifications
-- **Web Dashboard**: Real-time monitoring and case management
-- **Automated Scheduling**: Background jobs for maintenance and monitoring
-
-## New Features (Dashboard & Voice Integration)
-
-### 🔐 Security & Privacy
-- **Bcrypt Password Hashing**: Cost factor 12 for secure authentication
-- **JWT Tokens**: 15-minute access tokens with refresh token flow
-- **Data Masking**: Phone numbers and GPS coordinates masked based on role
-- **Field Encryption**: Phone and coordinates encrypted (demo mode, replace with KMS in production)
-- **Audit Logs**: Append-only logs with HMAC for tamper detection
-- **Rate Limiting**: Protection against brute force attacks
-
-### 📞 Voice Call Integration
-- **Transcript Streaming**: Real-time transcript segment ingestion
-- **Multi-Language Support**: English and Hindi transcripts with translation
-- **Audio Playback**: Stored audio clips for voice reports
-- **Twilio Webhooks**: Ready for Twilio Voice API integration
-
-### 🗺️ Geofencing & Escalation
-- **Polygon Geofences**: Define protected zones with automatic escalation
-- **Smart Escalation**: Auto-escalate pending cases after configurable threshold
-- **Daily Digest**: Automated daily reports to admins
-- **Retry Logic**: Failed notifications automatically retried
-
-### 👥 Responder Management
-- **Presence System**: Real-time online/offline status tracking
-- **Heartbeat Monitoring**: 90-second online threshold
-- **Suggested Matching**: Smart responder suggestions based on category and load
-- **Load Balancing**: Responders sorted by current case count
-
-### 📊 Admin Features
-- **Audit Log Viewer**: Searchable audit trail for all actions
-- **Geofence Management**: Create and delete geofences
-- **Responder Dashboard**: View all responders with status and load
-- **Statistics**: Real-time dashboard stats and metrics
-
 ## Quick Start
-
-### Quick Local Test (Twilio Sandbox + ngrok)
-
-1. Install deps and run MongoDB
-```bash
-npm install
-mongod
-```
-
-2. Create `.env`
-```env
-PORT=3000
-NODE_ENV=development
-MONGODB_URI=mongodb://localhost:27017/wildlife_reports
-TWILIO_ACCOUNT_SID=your_account_sid
-TWILIO_AUTH_TOKEN=your_auth_token
-TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
-```
-
-3. Start the server
-```bash
-npm run dev
-```
-
-4. Expose via ngrok (in another terminal)
-```bash
-ngrok http 3000
-```
-Copy the HTTPS forwarding URL.
-
-5. Configure Twilio WhatsApp Sandbox webhook
-- Twilio Console → Messaging → Try it out → WhatsApp Sandbox
-- Set “When a message comes in” to: `https://<your-ngrok>.ngrok.io/webhook/whatsapp`
-- Save
-
-6. Test on WhatsApp (after joining the Sandbox)
-- Send any message to receive the category prompt
-- Reply with 1-5 → send location text → send photos/videos or "skip" → send description
-- You’ll receive a case ID and can check status by sending: `STATUS <case-id>`
-
 
 ### Prerequisites
 - Node.js 16+ and npm
 - MongoDB 4.4+
 - Twilio WhatsApp Business Account
-- AWS S3 Bucket (for media storage)
+- AWS S3 Bucket (for media storage, optional for demo)
 
 ### Installation
 
-1. **Clone and Install**
+1. **Clone and Install All Dependencies**
 ```bash
 git clone <repository-url>
-cd wildlife-whatsapp-bot
-npm install
-
-# Install frontend dependencies
-cd client
-npm install
-cd ..
+cd Wildlife-Bot
+npm run install:all
 ```
 
-2. **Environment Setup**
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
+This will install dependencies for root, server, and client.
 
-3. **Database Setup**
+2. **Setup MongoDB**
 ```bash
 # Start MongoDB (if running locally)
 mongod
-
-# Seed sample data
-node scripts/seed-data.js
 ```
 
-4. **Start the Server**
+3. **Environment Setup**
 ```bash
-# Development
-npm run dev
-
-# Production
-npm start
+# Copy the example environment file
+cp .env.example server/.env
+# Edit server/.env with your configuration
 ```
 
-### Configuration
-
-#### Required Environment Variables
+Required environment variables in `server/.env`:
 ```env
-# Server
 PORT=3000
 NODE_ENV=development
-
-# MongoDB
 MONGODB_URI=mongodb://localhost:27017/wildlife_reports
-
-# Twilio WhatsApp
 TWILIO_ACCOUNT_SID=your_account_sid
 TWILIO_AUTH_TOKEN=your_auth_token
 TWILIO_WHATSAPP_NUMBER=whatsapp:+14155238886
-
-# AWS S3
 AWS_ACCESS_KEY_ID=your_access_key
 AWS_SECRET_ACCESS_KEY=your_secret_key
 AWS_REGION=us-east-1
 AWS_S3_BUCKET=wildlife-reports-media
 ```
 
-#### Twilio Webhook Setup
-1. Go to Twilio Console → WhatsApp → Sandbox
-2. Set webhook URL: `https://your-domain.com/webhook/whatsapp`
-3. Enable incoming messages
+4. **Seed Demo Data**
+```bash
+# From root directory
+npm run seed:demo
+```
+
+This creates demo users, cases, and generates placeholder audio/screenshots.
+
+5. **Start the Application**
+```bash
+# Start both server and client (recommended for development)
+npm run start:dev
+
+# Or start individually:
+# Terminal 1 - Backend Server
+npm run dev:server
+
+# Terminal 2 - Frontend Client
+npm run dev:client
+```
+
+6. **Access the Dashboard**
+- Open browser to: `http://localhost:5173`
+- Login with demo credentials:
+  - Admin: `admin@wildlife.local` / `admin123`
+  - Responder: `responder1@wildlife.local` / `responder123`
+
+### Quick WhatsApp Test (Twilio Sandbox + ngrok)
+
+1. **Expose your local server**
+```bash
+# In a new terminal
+ngrok http 3000
+```
+Copy the HTTPS forwarding URL (e.g., `https://abc123.ngrok.io`).
+
+2. **Configure Twilio WhatsApp Sandbox**
+- Go to Twilio Console → Messaging → Try it out → WhatsApp Sandbox
+- Set "When a message comes in" to: `https://<your-ngrok>.ngrok.io/webhook/whatsapp`
+- Save
+
+3. **Test on WhatsApp**
+- Join the Twilio Sandbox (follow instructions in Twilio Console)
+- Send any message to receive the category prompt
+- Reply with 1-5 → send location text → send photos/videos or "skip" → send description
+- You'll receive a case ID and can check status by sending: `STATUS <case-id>`
+
+## Available Scripts
+
+Run these commands from the **root directory**:
+
+```bash
+# Development
+npm run dev:server       # Start backend server in dev mode (port 3000)
+npm run dev:client       # Start frontend client in dev mode (port 5173)
+npm run start:dev        # Start both server and client concurrently
+
+# Production
+npm run start:server     # Start server in production mode
+npm run build:client     # Build client for production
+
+# Testing & Utilities
+npm test                 # Run server tests
+npm run seed             # Seed database with sample data
+npm run seed:demo        # Seed demo data with Indian locations
+npm run pixel-check      # Run pixel-perfect UI tests
+
+# Installation
+npm run install:all      # Install all dependencies (root, server, client)
+```
+
+### Server-Specific Scripts
+
+Run these from the `server/` directory:
+
+```bash
+cd server
+npm run dev              # Start server with nodemon
+npm start                # Start server in production
+npm test                 # Run Jest tests
+npm run seed             # Seed database
+npm run seed:demo        # Seed demo data
+npm run pixel-check      # Run pixel tests
+```
+
+### Client-Specific Scripts
+
+Run these from the `client/` directory:
+
+```bash
+cd client
+npm run dev              # Start Vite dev server
+npm run build            # Build for production
+npm run preview          # Preview production build
+```
 
 ## Usage Examples
 
@@ -232,16 +243,6 @@ Responder: "ACCEPT WR-1703123456-AB12"
 Bot: "✅ Case WR-1703123456-AB12 accepted successfully!"
 ```
 
-**Get Case Details**
-```
-Responder: "DETAILS WR-1703123456-AB12"
-Bot: "📋 Case Details: WR-1703123456-AB12
-📂 Category: Injured Animal
-🔥 Priority: HIGH
-📍 Location: Central Park, NYC
-📝 Description: Injured hawk with broken wing..."
-```
-
 **Resolve Case**
 ```
 Responder: "RESOLVE WR-1703123456-AB12 Successfully treated and released"
@@ -266,28 +267,9 @@ Bot: "✅ Case WR-1703123456-AB12 marked as resolved. Thank you!"
 #### Statistics
 - `GET /api/stats` - Get dashboard statistics
 
-### Example API Usage
-
-**Create Responder**
-```bash
-curl -X POST http://localhost:3000/api/responders \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Dr. Jane Smith",
-    "whatsappNumber": "+1234567890",
-    "organization": "Wildlife Rescue",
-    "categoriesHandled": ["injured_animal", "abandoned_pet"],
-    "location": {
-      "coordinates": { "latitude": 40.7128, "longitude": -74.0060 },
-      "address": "New York, NY"
-    }
-  }'
-```
-
-**Get Reports**
-```bash
-curl "http://localhost:3000/api/reports?status=pending&priority=high&page=1&limit=10"
-```
+#### Authentication
+- `POST /api/auth/login` - Login with email/password
+- `POST /api/auth/refresh` - Refresh access token
 
 ## Architecture
 
@@ -312,107 +294,56 @@ curl "http://localhost:3000/api/reports?status=pending&priority=high&page=1&limi
                        └──────────────────┘
 ```
 
-### Data Models
-
-**Report Schema**
-```javascript
-{
-  caseId: "WR-1703123456-AB12",
-  category: "injured_animal",
-  location: { coordinates: {...}, description: "..." },
-  description: "Detailed incident description",
-  priority: "high",
-  status: "pending",
-  mediaUrls: [...],
-  aiClassification: {...},
-  timeline: [...]
-}
-```
-
-**Responder Schema**
-```javascript
-{
-  name: "Dr. Sarah Johnson",
-  whatsappNumber: "+1234567890",
-  categoriesHandled: ["injured_animal", "abandoned_pet"],
-  location: { coordinates: {...}, serviceRadius: 25 },
-  status: "online",
-  currentCases: [...],
-  maxConcurrentCases: 3
-}
-```
-
 ## Deployment
 
 ### Production Deployment
 
-1. **Environment Setup**
+1. **Build the client**
 ```bash
-# Set production environment variables
+npm run build:client
+```
+
+2. **Set production environment variables**
+```bash
 export NODE_ENV=production
 export MONGODB_URI=mongodb://your-production-db
 export WEBHOOK_URL=https://your-domain.com
 ```
 
-2. **Process Management**
+3. **Start with PM2**
 ```bash
-# Using PM2
 npm install -g pm2
+cd server
 pm2 start src/server.js --name wildlife-bot
 pm2 startup
 pm2 save
 ```
 
-3. **Nginx Configuration**
-```nginx
-server {
-    listen 80;
-    server_name your-domain.com;
-    
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
-
 ### Docker Deployment
 
-```dockerfile
-FROM node:16-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-EXPOSE 3000
-CMD ["npm", "start"]
-```
+See `ops/` directory for Docker and docker-compose configurations (coming soon).
 
-## Monitoring & Maintenance
+## Migration Notes (v1.0 → v2.0)
 
-### Logging
-- Winston-based structured logging
-- Separate error and combined log files
-- Console output in development
+### What Changed
+- **File Structure**: Backend moved to `/server`, frontend to `/client`
+- **Scripts**: All scripts now in `/server/scripts`
+- **Static Assets**: Demo assets in `/server/static`
+- **Documentation**: Historical docs archived to `/archive`
+- **Package Scripts**: Root package.json has convenience scripts
 
-### Background Jobs
-- **Timeout Check**: Hourly scan for unassigned cases
-- **Cleanup**: Daily removal of old notifications
-- **Status Update**: 5-minute responder status refresh
+### What Stayed the Same
+- All API endpoints unchanged
+- Database schema unchanged
+- Environment variables unchanged (just moved to `server/.env`)
+- WhatsApp bot functionality unchanged
+- Dashboard features unchanged
 
-### Health Monitoring
-```bash
-# Health check endpoint
-curl http://localhost:3000/webhook/health
-
-# Response
-{
-  "status": "healthy",
-  "timestamp": "2024-01-15T10:30:00.000Z",
-  "service": "wildlife-whatsapp-bot"
-}
-```
+### How to Update Your Local Setup
+1. Pull the latest changes
+2. Run `npm run install:all` to install dependencies
+3. Move your `.env` file to `server/.env`
+4. Use new scripts: `npm run start:dev` instead of `npm run dev`
 
 ## Contributing
 
@@ -431,7 +362,7 @@ MIT License - see LICENSE file for details
 For issues and questions:
 - Create GitHub issue for bugs
 - Check documentation for common problems
-- Review logs for troubleshooting
+- Review logs in `server/logs/` for troubleshooting
 
 ---
 

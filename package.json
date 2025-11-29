@@ -1,43 +1,22 @@
 {
   "name": "wildlife-whatsapp-bot",
-  "version": "1.0.0",
-  "description": "WhatsApp bot for wildlife incident reporting with MongoDB integration",
-  "main": "src/server.js",
+  "version": "2.0.0",
+  "description": "Wildlife WhatsApp Bot System - Monorepo",
+  "private": true,
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
-    "test": "jest",
-    "seed": "node scripts/seed-data.js",
-    "seed:demo": "node scripts/seed-demo.js",
-    "pixel-check": "node scripts/pixel-check.js --baseUrl=http://localhost:5173 --adminEmail=admin@wildlife.local --adminPass=admin123 --thresholdPct=2.0"
-  },
-  "dependencies": {
-    "aws-sdk": "^2.1490.0",
-    "bcrypt": "^6.0.0",
-    "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "joi": "^17.11.0",
-    "jsonwebtoken": "^9.0.2",
-    "mongodb": "^6.20.0",
-    "mongoose": "^8.0.3",
-    "multer": "^1.4.5-lts.1",
-    "natural": "^6.8.0",
-    "ngrok": "^5.0.0-beta.2",
-    "node-cron": "^3.0.3",
-    "node-fetch": "^3.3.2",
-    "puppeteer": "^21.6.1",
-    "twilio": "^4.19.0",
-    "uuid": "^9.0.1",
-    "winston": "^3.11.0"
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "start:dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "start:server": "cd server && npm start",
+    "build:client": "cd client && npm run build",
+    "test": "cd server && npm test",
+    "seed": "cd server && npm run seed",
+    "seed:demo": "cd server && npm run seed:demo",
+    "pixel-check": "cd server && npm run pixel-check",
+    "install:all": "npm install && cd server && npm install && cd ../client && npm install"
   },
   "devDependencies": {
-    "jest": "^29.7.0",
-    "minimist": "^1.2.8",
-    "nodemon": "^3.0.2",
-    "pixelmatch": "^7.1.0",
-    "pngjs": "^7.0.0",
-    "supertest": "^6.3.3"
+    "concurrently": "^8.2.2"
   },
   "keywords": [
     "whatsapp",
