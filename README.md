@@ -11,8 +11,13 @@ A comprehensive WhatsApp bot system for reporting and managing wildlife incident
 - **Role-Based Access**: Admin and Responder roles with proper data masking
 - **Real-time Filters**: Filter by source, status, priority, language
 - **Case Management**: Accept and resolve cases directly from dashboard
+- **Presence System**: Real-time responder online/offline status
+- **Geofencing**: Automatic escalation for cases in protected zones
+- **Audit Logs**: Complete tamper-proof audit trail with HMAC
+- **Smart Routing**: Suggested responder matching based on category and availability
 
 See [DASHBOARD_DEMO_GUIDE.md](./DASHBOARD_DEMO_GUIDE.md) for complete dashboard documentation.
+See [DASHBOARD_VOICE_INTEGRATION.md](./DASHBOARD_VOICE_INTEGRATION.md) for voice integration and API details.
 
 ### 🤖 WhatsApp Bot Capabilities
 - **Guided Conversation Flow**: Step-by-step incident reporting
@@ -42,6 +47,40 @@ See [DASHBOARD_DEMO_GUIDE.md](./DASHBOARD_DEMO_GUIDE.md) for complete dashboard 
 - **Volunteer Network**: Proximity-based volunteer notifications
 - **Web Dashboard**: Real-time monitoring and case management
 - **Automated Scheduling**: Background jobs for maintenance and monitoring
+
+## New Features (Dashboard & Voice Integration)
+
+### 🔐 Security & Privacy
+- **Bcrypt Password Hashing**: Cost factor 12 for secure authentication
+- **JWT Tokens**: 15-minute access tokens with refresh token flow
+- **Data Masking**: Phone numbers and GPS coordinates masked based on role
+- **Field Encryption**: Phone and coordinates encrypted (demo mode, replace with KMS in production)
+- **Audit Logs**: Append-only logs with HMAC for tamper detection
+- **Rate Limiting**: Protection against brute force attacks
+
+### 📞 Voice Call Integration
+- **Transcript Streaming**: Real-time transcript segment ingestion
+- **Multi-Language Support**: English and Hindi transcripts with translation
+- **Audio Playback**: Stored audio clips for voice reports
+- **Twilio Webhooks**: Ready for Twilio Voice API integration
+
+### 🗺️ Geofencing & Escalation
+- **Polygon Geofences**: Define protected zones with automatic escalation
+- **Smart Escalation**: Auto-escalate pending cases after configurable threshold
+- **Daily Digest**: Automated daily reports to admins
+- **Retry Logic**: Failed notifications automatically retried
+
+### 👥 Responder Management
+- **Presence System**: Real-time online/offline status tracking
+- **Heartbeat Monitoring**: 90-second online threshold
+- **Suggested Matching**: Smart responder suggestions based on category and load
+- **Load Balancing**: Responders sorted by current case count
+
+### 📊 Admin Features
+- **Audit Log Viewer**: Searchable audit trail for all actions
+- **Geofence Management**: Create and delete geofences
+- **Responder Dashboard**: View all responders with status and load
+- **Statistics**: Real-time dashboard stats and metrics
 
 ## Quick Start
 
