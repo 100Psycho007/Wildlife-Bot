@@ -22,6 +22,22 @@ function DashboardPixelPerfect() {
   const [loading, setLoading] = useState(true);
   const [selectedCase, setSelectedCase] = useState(null);
 
+  const navButtonStyle = (isActive) => ({
+    background: isActive ? 'rgba(255,255,255,0.25)' : 'transparent',
+    border: 'none',
+    color: 'white',
+    padding: '10px 18px',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    fontWeight: '600',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    transition: 'all 200ms',
+    backdropFilter: isActive ? 'blur(10px)' : 'none'
+  });
+
   useEffect(() => {
     fetchDashboardData();
   }, []);
@@ -98,101 +114,35 @@ function DashboardPixelPerfect() {
 
   const renderTopNav = () => (
     <div style={{
-      background: '#2d7a3e',
+      background: 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
       color: 'white',
-      padding: '12px 24px',
+      padding: '16px 32px',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'space-between'
+      justifyContent: 'space-between',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+      position: 'sticky',
+      top: 0,
+      zIndex: 100
     }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <div style={{ fontSize: '20px' }}>🦁</div>
-        <span style={{ fontSize: '16px', fontWeight: '600' }}>Wildlife Emergency Dashboard</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ fontSize: '28px' }}>🦁</div>
+        <span style={{ fontSize: '18px', fontWeight: '700', letterSpacing: '-0.02em' }}>Wildlife Emergency Dashboard</span>
       </div>
       <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-        <button
-          onClick={() => setActiveView('dashboard')}
-          style={{
-            background: activeView === 'dashboard' ? 'rgba(255,255,255,0.2)' : 'transparent',
-            border: 'none',
-            color: 'white',
-            padding: '8px 16px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-        >
+        <button onClick={() => setActiveView('dashboard')} style={navButtonStyle(activeView === 'dashboard')}>
           📊 DASHBOARD
         </button>
-        <button
-          onClick={() => setActiveView('cases')}
-          style={{
-            background: activeView === 'cases' ? 'rgba(255,255,255,0.2)' : 'transparent',
-            border: 'none',
-            color: 'white',
-            padding: '8px 16px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-        >
+        <button onClick={() => setActiveView('cases')} style={navButtonStyle(activeView === 'cases')}>
           📋 CASES
         </button>
-        <button
-          onClick={() => setActiveView('map')}
-          style={{
-            background: activeView === 'map' ? 'rgba(255,255,255,0.2)' : 'transparent',
-            border: 'none',
-            color: 'white',
-            padding: '8px 16px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-        >
+        <button onClick={() => setActiveView('map')} style={navButtonStyle(activeView === 'map')}>
           🗺️ MAP
         </button>
-        <button
-          onClick={() => setActiveView('responders')}
-          style={{
-            background: activeView === 'responders' ? 'rgba(255,255,255,0.2)' : 'transparent',
-            border: 'none',
-            color: 'white',
-            padding: '8px 16px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-        >
+        <button onClick={() => setActiveView('responders')} style={navButtonStyle(activeView === 'responders')}>
           👥 RESPONDERS
         </button>
-        <button
-          onClick={() => setActiveView('geofences')}
-          style={{
-            background: activeView === 'geofences' ? 'rgba(255,255,255,0.2)' : 'transparent',
-            border: 'none',
-            color: 'white',
-            padding: '8px 16px',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
-        >
+        <button onClick={() => setActiveView('geofences')} style={navButtonStyle(activeView === 'geofences')}>
           🛡️ GEOFENCES
         </button>
         <div style={{ width: '1px', height: '24px', background: 'rgba(255,255,255,0.3)' }}></div>
@@ -210,112 +160,156 @@ function DashboardPixelPerfect() {
   );
 
   const renderStatsCards = () => (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '20px' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px', marginBottom: '24px' }}>
       <div style={{
         background: 'white',
-        borderRadius: '10px',
-        padding: '20px',
-        boxShadow: '0 6px 20px rgba(2,6,23,0.06)',
+        borderRadius: '12px',
+        padding: '24px',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
         display: 'flex',
         alignItems: 'center',
-        gap: '16px'
+        gap: '16px',
+        transition: 'all 200ms',
+        cursor: 'pointer'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
       }}>
         <div style={{
-          width: '48px',
-          height: '48px',
-          background: '#22c55e',
-          borderRadius: '8px',
+          width: '56px',
+          height: '56px',
+          background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+          borderRadius: '12px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '24px'
+          fontSize: '28px',
+          boxShadow: '0 4px 6px rgba(16, 185, 129, 0.3)'
         }}>
           📁
         </div>
         <div>
-          <div style={{ fontSize: '28px', fontWeight: '700', color: '#0f172a' }}>{stats.total}</div>
-          <div style={{ fontSize: '12px', color: '#6b7280' }}>Total Cases</div>
+          <div style={{ fontSize: '32px', fontWeight: '700', color: '#0f172a', lineHeight: '1' }}>{stats.total}</div>
+          <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px', fontWeight: '500' }}>Total Cases</div>
         </div>
       </div>
 
       <div style={{
         background: 'white',
-        borderRadius: '10px',
-        padding: '20px',
-        boxShadow: '0 6px 20px rgba(2,6,23,0.06)',
+        borderRadius: '12px',
+        padding: '24px',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
         display: 'flex',
         alignItems: 'center',
-        gap: '16px'
+        gap: '16px',
+        transition: 'all 200ms',
+        cursor: 'pointer'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
       }}>
         <div style={{
-          width: '48px',
-          height: '48px',
-          background: '#f97316',
-          borderRadius: '8px',
+          width: '56px',
+          height: '56px',
+          background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+          borderRadius: '12px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '24px'
+          fontSize: '28px',
+          boxShadow: '0 4px 6px rgba(249, 115, 22, 0.3)'
         }}>
           🔥
         </div>
         <div>
-          <div style={{ fontSize: '28px', fontWeight: '700', color: '#0f172a' }}>{stats.active}</div>
-          <div style={{ fontSize: '12px', color: '#6b7280' }}>Active Cases</div>
+          <div style={{ fontSize: '32px', fontWeight: '700', color: '#0f172a', lineHeight: '1' }}>{stats.active}</div>
+          <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px', fontWeight: '500' }}>Active Cases</div>
         </div>
       </div>
 
       <div style={{
         background: 'white',
-        borderRadius: '10px',
-        padding: '20px',
-        boxShadow: '0 6px 20px rgba(2,6,23,0.06)',
+        borderRadius: '12px',
+        padding: '24px',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
         display: 'flex',
         alignItems: 'center',
-        gap: '16px'
+        gap: '16px',
+        transition: 'all 200ms',
+        cursor: 'pointer'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
       }}>
         <div style={{
-          width: '48px',
-          height: '48px',
-          background: '#ef4444',
-          borderRadius: '8px',
+          width: '56px',
+          height: '56px',
+          background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+          borderRadius: '12px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '24px'
+          fontSize: '28px',
+          boxShadow: '0 4px 6px rgba(239, 68, 68, 0.3)'
         }}>
           ⚠️
         </div>
         <div>
-          <div style={{ fontSize: '28px', fontWeight: '700', color: '#0f172a' }}>{stats.critical}</div>
-          <div style={{ fontSize: '12px', color: '#6b7280' }}>Critical Cases</div>
+          <div style={{ fontSize: '32px', fontWeight: '700', color: '#0f172a', lineHeight: '1' }}>{stats.critical}</div>
+          <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px', fontWeight: '500' }}>Critical Cases</div>
         </div>
       </div>
 
       <div style={{
         background: 'white',
-        borderRadius: '10px',
-        padding: '20px',
-        boxShadow: '0 6px 20px rgba(2,6,23,0.06)',
+        borderRadius: '12px',
+        padding: '24px',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
         display: 'flex',
         alignItems: 'center',
-        gap: '16px'
+        gap: '16px',
+        transition: 'all 200ms',
+        cursor: 'pointer'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = 'translateY(-4px)';
+        e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = 'translateY(0)';
+        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
       }}>
         <div style={{
-          width: '48px',
-          height: '48px',
-          background: '#16a34a',
-          borderRadius: '8px',
+          width: '56px',
+          height: '56px',
+          background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+          borderRadius: '12px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          fontSize: '24px'
+          fontSize: '28px',
+          boxShadow: '0 4px 6px rgba(34, 197, 94, 0.3)'
         }}>
           ✅
         </div>
         <div>
-          <div style={{ fontSize: '28px', fontWeight: '700', color: '#0f172a' }}>{stats.resolved}</div>
-          <div style={{ fontSize: '12px', color: '#6b7280' }}>Resolved Cases</div>
+          <div style={{ fontSize: '32px', fontWeight: '700', color: '#0f172a', lineHeight: '1' }}>{stats.resolved}</div>
+          <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px', fontWeight: '500' }}>Resolved Cases</div>
         </div>
       </div>
     </div>

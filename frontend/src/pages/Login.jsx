@@ -33,12 +33,26 @@ function Login() {
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center',
-      background: '#f5f5f5'
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      padding: '20px'
     }}>
-      <div className="card" style={{ width: '100%', maxWidth: '400px' }}>
-        <h1 style={{ marginBottom: '24px', fontSize: '24px', fontWeight: '600' }}>
-          Wildlife Responder Dashboard
-        </h1>
+      <div style={{ 
+        background: 'white',
+        borderRadius: '16px',
+        padding: '40px',
+        width: '100%',
+        maxWidth: '440px',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+      }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🦁</div>
+          <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>
+            Wildlife Emergency
+          </h1>
+          <p style={{ fontSize: '14px', color: '#64748b' }}>
+            Responder Dashboard
+          </p>
+        </div>
         
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '16px' }}>
@@ -84,9 +98,22 @@ function Login() {
 
           <button 
             type="submit" 
-            className="btn btn-primary" 
-            style={{ width: '100%' }}
+            style={{ 
+              width: '100%',
+              background: loading ? '#94a3b8' : '#2563eb',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '12px',
+              fontSize: '16px',
+              fontWeight: '600',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'all 200ms',
+              boxShadow: loading ? 'none' : '0 1px 3px rgba(0, 0, 0, 0.1)'
+            }}
             disabled={loading}
+            onMouseEnter={(e) => !loading && (e.target.style.background = '#1d4ed8')}
+            onMouseLeave={(e) => !loading && (e.target.style.background = '#2563eb')}
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>

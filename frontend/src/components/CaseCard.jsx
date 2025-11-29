@@ -1,27 +1,34 @@
 export default function CaseCard({ caseObj, onClick, onAccept }) {
   const priorityColor = 
     caseObj.priority === 'high' || caseObj.priority === 'critical' 
-      ? 'var(--priority-high)' 
+      ? '#ef4444' 
       : caseObj.priority === 'medium' 
-        ? 'var(--priority-medium)' 
-        : 'var(--priority-low)';
+        ? '#f97316' 
+        : '#64748b';
 
   return (
     <div 
       className="case-card" 
       style={{ 
-        borderLeftColor: priorityColor,
+        borderLeft: `4px solid ${priorityColor}`,
+        background: '#ffffff',
+        borderRadius: '12px',
+        padding: '16px',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
         cursor: 'pointer',
-        transition: 'transform 0.2s, box-shadow 0.2s'
+        transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+        display: 'flex',
+        gap: '16px',
+        alignItems: 'flex-start'
       }}
       onClick={() => onClick && onClick(caseObj)}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-2px)';
-        e.currentTarget.style.boxShadow = '0 8px 24px rgba(2,6,23,0.12)';
+        e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = '';
+        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
       }}
     >
       <div className="priority-strip" style={{ background: priorityColor }}></div>
