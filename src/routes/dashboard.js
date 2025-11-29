@@ -437,6 +437,74 @@ router.post('/geofences', requireRole('ADMIN'), async (req, res) => {
 });
 
 /**
+ * Geofences - Delete (admin only)
+ */
+router.delete('/geofences/:id', requireRole('ADMIN'), async (req, res) => {
+  try {
+    const geofence = await Geofence.findById(req.params.id);
+    
+    if (!geofence) {
+      return res.status(404).json({ error: 'Geofence not found' });
+    }
+    
+    geofence.isActive = false;
+    await geofence.save();
+    
+    await Audit.createLog({
+      actorId: req.user.id,
+      action: 'geofence_deleted',
+      targetId: geofence._id.toString(),
+      targetType: 'Geofence',
+      details: { name: geofence.name },
+      ip: req.ip,
+      userAgent: req.get('User-Agent')
+    });
+    
+    res.json({ success: true, message: 'Geofence deleted' });
+  } catch (error) {
+    logger.error('Failed to delete geofence', { error: error.message });
+    res.status(500).json({ error: 'Failed to delete geofence' });
+  }
+});
+
+/**
+ * Audit logs (admin only)
+ */
+router.get('/audit', requireRole('ADMIN'), async (req, res) => {
+  try {
+    const { action, userId, caseId, page = 1, limit = 50 } = req.query;
+    
+    const filter = {};
+    if (action) filter.action = action;
+    if (userId) filter.actorId = userId;
+    if (caseId) filter.targetId = caseId;
+    
+    const skip = (page - 1) * limit;
+    
+    const logs = await Audit.find(filter)
+      .populate('actorId', 'name email')
+      .sort({ timestamp: -1 })
+      .skip(skip)
+      .limit(parseInt(limit));
+    
+    const total = await Audit.countDocuments(filter);
+    
+    res.json({
+      logs,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    logger.error('Failed to fetch audit logs', { error: error.message });
+    res.status(500).json({ error: 'Failed to fetch audit logs' });
+  }
+});
+
+/**
  * Dashboard stats
  */
 router.get('/stats', async (req, res) => {

@@ -24,8 +24,16 @@ router.post('/login', rateLimitAuth, async (req, res) => {
     // Find user by email
     const user = await User.findOne({ email, isActive: true });
 
-    if (!user || user.password !== password) {
-      logger.warn('Failed login attempt', { email });
+    if (!user) {
+      logger.warn('Failed login attempt - user not found', { email });
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    // Compare password using bcrypt
+    const isPasswordValid = await user.comparePassword(password);
+    
+    if (!isPasswordValid) {
+      logger.warn('Failed login attempt - invalid password', { email });
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 

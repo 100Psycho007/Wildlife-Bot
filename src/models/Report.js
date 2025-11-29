@@ -42,6 +42,7 @@ const reportSchema = new mongoose.Schema({
   transcript: {
     partial: String,
     final: String,
+    englishTranslation: String,
     segments: [{
       text: String,
       timestamp: Number,

@@ -11,6 +11,26 @@ L.Icon.Default.mergeOptions({
 });
 
 export default function MapView({ cases = [], center = [12.9716, 77.5946], zoom = 10 }) {
+  // Validate cases is an array
+  if (!Array.isArray(cases)) {
+    console.error('MapView: cases prop must be an array, received:', typeof cases);
+    return (
+      <div style={{ 
+        height: '100%', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        background: '#f3f4f6',
+        borderRadius: '8px'
+      }}>
+        <div style={{ textAlign: 'center', color: '#6b7280' }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>🗺️</div>
+          <div>Map data is loading...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <MapContainer 
       center={center} 
@@ -21,7 +41,7 @@ export default function MapView({ cases = [], center = [12.9716, 77.5946], zoom 
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      {cases.map((caseItem) => {
+      {Array.isArray(cases) && cases.map((caseItem) => {
         if (caseItem.location?.coordinates) {
           const [lng, lat] = caseItem.location.coordinates;
           return (

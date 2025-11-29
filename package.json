@@ -7,11 +7,13 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test": "jest",
+    "seed": "node scripts/seed-data.js",
     "seed:demo": "node scripts/seed-demo.js",
-    "pixel-check": "node scripts/pixel-check.js"
+    "pixel-check": "node scripts/pixel-check.js --baseUrl=http://localhost:5173 --adminEmail=admin@wildlife.local --adminPass=admin123 --thresholdPct=2.0"
   },
   "dependencies": {
     "aws-sdk": "^2.1490.0",
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
@@ -31,6 +33,7 @@
   },
   "devDependencies": {
     "jest": "^29.7.0",
+    "minimist": "^1.2.8",
     "nodemon": "^3.0.2",
     "pixelmatch": "^7.1.0",
     "pngjs": "^7.0.0",

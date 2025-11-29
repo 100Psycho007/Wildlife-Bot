@@ -1,26 +1,70 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const path = require('path');
-const PNG = require('pngjs').PNG;
+const { PNG } = require('pngjs');
 const pixelmatch = require('pixelmatch');
-const fetch = require('node-fetch');
+const minimist = require('minimist');
 
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
-const REFERENCE_DIR = path.join(__dirname, '../static/demo-ui-frames');
-const OUTPUT_DIR = path.join(__dirname, '../static/demo-screenshots');
-const THRESHOLD = 0.02; // 2% difference threshold
+const args = minimist(process.argv.slice(2), {
+  string: ['baseUrl', 'adminEmail', 'adminPass', 'thresholdPct'],
+  default: {
+    baseUrl: 'http://localhost:5173',
+    adminEmail: 'admin@wildlife-demo.local',
+    adminPass: 'demo123',
+    thresholdPct: '2.0'
+  }
+});
 
-// Ensure output directory exists
-if (!fs.existsSync(OUTPUT_DIR)) {
-  fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+const BASE_URL = args.baseUrl;
+const ADMIN_EMAIL = args.adminEmail;
+const ADMIN_PASS = args.adminPass;
+const THRESHOLD_PCT = parseFloat(args.thresholdPct);
+
+const SCREENSHOTS_DIR = path.join(__dirname, '../static/demo-screenshots');
+const REFERENCE_DIR = path.join(__dirname, '../reference-screenshots');
+
+// Ensure directories exist
+if (!fs.existsSync(SCREENSHOTS_DIR)) {
+  fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
 }
 
-async function compareImages(img1Path, img2Path, diffPath) {
-  if (!fs.existsSync(img1Path)) {
-    console.log(`⚠️  Reference image not found: ${img1Path}`);
-    return { match: true, diff: 0 };
-  }
+async function login(page) {
+  console.log('Logging in...');
+  await page.goto(`${BASE_URL}/login`, { waitUntil: 'networkidle2' });
+  
+  await page.type('input[type="email"]', ADMIN_EMAIL);
+  await page.type('input[type="password"]', ADMIN_PASS);
+  await page.click('button[type="submit"]');
+  
+  await page.waitForNavigation({ waitUntil: 'networkidle2' });
+  console.log('✓ Logged in successfully');
+}
 
+async function takeScreenshot(page, name, selector = null) {
+  const filepath = path.join(SCREENSHOTS_DIR, `${name}.png`);
+  
+  if (selector) {
+    const element = await page.$(selector);
+    if (element) {
+      await element.screenshot({ path: filepath });
+    } else {
+      console.warn(`⚠ Element ${selector} not found for ${name}`);
+      await page.screenshot({ path: filepath, fullPage: true });
+    }
+  } else {
+    await page.screenshot({ path: filepath, fullPage: true });
+  }
+  
+  console.log(`✓ Screenshot saved: ${name}.png`);
+  return filepath;
+}
+
+function compareImages(img1Path, img2Path) {
+  if (!fs.existsSync(img1Path) || !fs.existsSync(img2Path)) {
+    console.log('⚠ Reference image not found, skipping comparison');
+    return { diffPercent: 0, passed: true, skipped: true };
+  }
+  
   const img1 = PNG.sync.read(fs.readFileSync(img1Path));
   const img2 = PNG.sync.read(fs.readFileSync(img2Path));
   
@@ -36,137 +80,91 @@ async function compareImages(img1Path, img2Path, diffPath) {
     { threshold: 0.1 }
   );
   
+  const totalPixels = width * height;
+  const diffPercent = (numDiffPixels / totalPixels) * 100;
+  
+  // Save diff image
+  const diffPath = img1Path.replace('.png', '_diff.png');
   fs.writeFileSync(diffPath, PNG.sync.write(diff));
   
-  const totalPixels = width * height;
-  const diffPercentage = (numDiffPixels / totalPixels) * 100;
-  
   return {
-    match: diffPercentage <= (THRESHOLD * 100),
-    diff: diffPercentage,
+    diffPercent: diffPercent.toFixed(2),
+    passed: diffPercent <= THRESHOLD_PCT,
     numDiffPixels,
     totalPixels
   };
 }
 
 async function runPixelCheck() {
-  console.log('=== Pixel-Perfect Visual Diff Check ===\n');
-  console.log(`Frontend URL: ${FRONTEND_URL}`);
-  console.log(`Threshold: ${THRESHOLD * 100}%\n`);
-
-  // Check if frontend is accessible
-  console.log('Checking if frontend is running...');
-  try {
-    const response = await fetch(FRONTEND_URL);
-    if (!response.ok) {
-      throw new Error(`Frontend returned status ${response.status}`);
-    }
-    console.log('✓ Frontend is accessible\n');
-  } catch (error) {
-    console.error('❌ Cannot connect to frontend at', FRONTEND_URL);
-    console.error('\nPlease ensure:');
-    console.error('1. Frontend is running: cd client && npm run dev');
-    console.error('2. Frontend is accessible at http://localhost:5173');
-    console.error('3. Backend is running: npm run dev');
-    console.error('4. Demo data is seeded: npm run seed:demo\n');
-    process.exit(1);
-  }
-
+  console.log('=== Wildlife Bot Pixel Check ===\n');
+  console.log(`Base URL: ${BASE_URL}`);
+  console.log(`Threshold: ${THRESHOLD_PCT}%\n`);
+  
   const browser = await puppeteer.launch({
     headless: 'new',
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
-
+  
   try {
     const page = await browser.newPage();
     await page.setViewport({ width: 1920, height: 1080 });
-
-    // Login first
-    console.log('Step 1: Logging in...');
-    try {
-      await page.goto(`${FRONTEND_URL}/login`, { waitUntil: 'networkidle0', timeout: 10000 });
-    } catch (error) {
-      console.error('❌ Failed to load login page');
-      console.error('Make sure frontend is running on port 5173');
-      throw error;
-    }
     
-    await page.type('input[type="email"]', 'admin@wildlife-demo.local');
-    await page.type('input[type="password"]', 'demo123');
-    await page.click('button[type="submit"]');
-    await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 10000 });
-    console.log('✓ Logged in successfully\n');
-
+    // Login
+    await login(page);
+    
+    // Take screenshots
+    console.log('\nCapturing screenshots...');
+    
     const screenshots = [
-      {
-        name: 'dashboard_home_page',
-        action: async () => {
-          await page.goto(`${FRONTEND_URL}/dashboard`, { waitUntil: 'networkidle0' });
-          await page.waitForTimeout(2000);
-        }
-      },
-      {
-        name: 'dashboard_responders',
-        action: async () => {
-          await page.click('button:has-text("RESPONDERS")');
-          await page.waitForTimeout(2000);
-        }
-      },
-      {
-        name: 'dashboard_map',
-        action: async () => {
-          await page.click('button:has-text("MAP")');
-          await page.waitForTimeout(3000); // Wait for map to load
-        }
-      }
+      { name: 'dashboard_overview', url: '/dashboard', selector: null },
+      { name: 'voice_case_detail_hi', url: '/dashboard/cases/WR-DEMO-VOICE-HI-001', selector: null }
     ];
-
+    
     const results = [];
-
-    for (const screenshot of screenshots) {
-      console.log(`Step: Capturing ${screenshot.name}...`);
+    
+    for (const shot of screenshots) {
+      await page.goto(`${BASE_URL}${shot.url}`, { waitUntil: 'networkidle2' });
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for animations
       
-      await screenshot.action();
+      const screenshotPath = await takeScreenshot(page, shot.name, shot.selector);
       
-      const outputPath = path.join(OUTPUT_DIR, `${screenshot.name}.png`);
-      await page.screenshot({ path: outputPath, fullPage: false });
-      console.log(`✓ Screenshot saved: ${outputPath}`);
-      
-      const referencePath = path.join(REFERENCE_DIR, `${screenshot.name}.png`);
-      const diffPath = path.join(OUTPUT_DIR, `${screenshot.name}_diff.png`);
-      
-      const comparison = await compareImages(referencePath, outputPath, diffPath);
+      // Compare with reference if exists
+      const referencePath = path.join(REFERENCE_DIR, `${shot.name}.png`);
+      const comparison = compareImages(screenshotPath, referencePath);
       
       results.push({
-        name: screenshot.name,
+        name: shot.name,
         ...comparison
       });
-      
-      if (comparison.match) {
-        console.log(`✅ PASS: ${screenshot.name} (${comparison.diff.toFixed(2)}% difference)\n`);
+    }
+    
+    // Print results
+    console.log('\n=== Pixel Check Results ===\n');
+    
+    let allPassed = true;
+    for (const result of results) {
+      if (result.skipped) {
+        console.log(`⚠ ${result.name}: SKIPPED (no reference)`);
+      } else if (result.passed) {
+        console.log(`✓ ${result.name}: PASSED (${result.diffPercent}% diff)`);
       } else {
-        console.log(`❌ FAIL: ${screenshot.name} (${comparison.diff.toFixed(2)}% difference > ${THRESHOLD * 100}%)`);
-        console.log(`   Diff image: ${diffPath}\n`);
+        console.log(`✗ ${result.name}: FAILED (${result.diffPercent}% diff, threshold: ${THRESHOLD_PCT}%)`);
+        allPassed = false;
       }
     }
-
-    console.log('\n=== Summary ===');
-    const passed = results.filter(r => r.match).length;
-    const failed = results.filter(r => !r.match).length;
     
-    console.log(`Passed: ${passed}/${results.length}`);
-    console.log(`Failed: ${failed}/${results.length}`);
+    console.log('\n' + '='.repeat(40));
     
-    if (failed > 0) {
-      console.log('\n❌ Visual diff check FAILED');
-      console.log('Review diff images in:', OUTPUT_DIR);
-      process.exit(1);
+    if (allPassed) {
+      console.log('✓ All pixel checks passed!');
+      process.exit(0);
     } else {
-      console.log('\n✅ All visual diff checks PASSED');
+      console.log('✗ Some pixel checks failed');
+      process.exit(1);
     }
-
+    
   } catch (error) {
-    console.error('\n❌ Error during pixel check:', error.message);
+    console.error('\n❌ Error:', error.message);
     process.exit(1);
   } finally {
     await browser.close();

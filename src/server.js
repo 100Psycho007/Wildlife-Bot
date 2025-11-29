@@ -9,6 +9,7 @@ const apiRoutes = require('./routes/api');
 const authRoutes = require('./routes/auth');
 const dashboardRoutes = require('./routes/dashboard');
 const seedRoutes = require('./routes/seed');
+const transcriptRoutes = require('./routes/transcripts');
 const scheduler = require('./jobs/scheduler');
 const logger = require('./utils/logger');
 
@@ -43,6 +44,7 @@ app.use('/api', apiRoutes);
 app.use('/auth', authRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/seed', seedRoutes);
+app.use('/api/transcripts', transcriptRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

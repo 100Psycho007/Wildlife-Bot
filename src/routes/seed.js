@@ -51,7 +51,7 @@ router.post('/demo-voice-cases', async (req, res) => {
           district: 'Bengaluru Urban',
           serviceRadius: 30
         },
-        status: 'AVAILABLE',
+        status: 'online',
         isActive: true,
         lastSeen: new Date('2025-10-01T02:26:00+05:30')
       });
@@ -73,7 +73,7 @@ router.post('/demo-voice-cases', async (req, res) => {
           district: 'Mysuru',
           serviceRadius: 40
         },
-        status: 'AVAILABLE',
+        status: 'online',
         isActive: true,
         lastSeen: new Date('2025-10-01T02:26:00+05:30')
       });
@@ -95,7 +95,7 @@ router.post('/demo-voice-cases', async (req, res) => {
           district: 'Hubballi-Dharwad',
           serviceRadius: 50
         },
-        status: 'AVAILABLE',
+        status: 'online',
         isActive: true,
         lastSeen: new Date('2025-10-01T02:26:00+05:30')
       });
@@ -117,7 +117,7 @@ router.post('/demo-voice-cases', async (req, res) => {
           district: 'Bengaluru Urban',
           serviceRadius: 100
         },
-        status: 'AVAILABLE',
+        status: 'online',
         isActive: true,
         lastSeen: new Date('2025-10-01T02:34:00+05:30')
       });
@@ -259,6 +259,7 @@ router.post('/demo-voice-cases', async (req, res) => {
       transcript: {
         partial: 'Aaj subah ek bhediya...',
         final: 'Aaj subah ek bhediya road ke paas nazar aaya. Location: Laxmi Chowk ke piche wale khet ke paas. Bhediya shayad chot mein nahi dikh raha tha par bahut paas se guzra. Bachchon ko school se bol do ki raasta avoid karein. Kripya forest department ko inform karein.',
+        englishTranslation: 'This morning a wolf was spotted near the road. Location: Behind Laxmi Chowk, near the fields. The wolf did not appear to be injured but passed very close by. Tell the children from school to avoid that route. Please inform the forest department.',
         segments: [
           { text: 'Aaj subah ek bhediya road ke paas nazar aaya', timestamp: 0, confidence: 0.88 },
           { text: 'Location: Laxmi Chowk ke piche wale khet ke paas', timestamp: 3500, confidence: 0.85 },

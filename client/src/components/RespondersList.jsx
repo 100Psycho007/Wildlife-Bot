@@ -14,51 +14,36 @@ export default function RespondersList() {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      if (filters.status) params.append('status', filters.status);
+      if (filters.status) params.append('status', filters.status.toLowerCase());
       if (filters.role) params.append('role', filters.role);
       
-      const response = await api.get(`/responders?${params}`);
-      setResponders(response.data.responders || []);
+      const response = await api.get(`/dashboard/responders?${params}`);
+      const respondersData = response.data.responders || response.data || [];
+      setResponders(Array.isArray(respondersData) ? respondersData : []);
     } catch (error) {
       console.error('Failed to fetch responders:', error);
+      setResponders([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const getRoleBadge = (role) => {
-    const colors = {
-      'NGO': '#2563eb',
-      'RESPONDER': '#22c55e',
-      'FOREST_OFFICIAL': '#f97316',
-      'ADMIN': '#ef4444'
-    };
-    return (
-      <span 
-        style={{
-          background: colors[role] || '#6b7280',
-          color: 'white',
-          padding: '4px 8px',
-          borderRadius: '999px',
-          fontSize: '12px',
-          fontWeight: '600'
-        }}
-      >
-        {role.replace('_', ' ')}
-      </span>
-    );
+  const getRoleBadge = (categories) => {
+    if (!categories || categories.length === 0) return 'General';
+    return categories.map(cat => cat.replace('_', ' ').toUpperCase()).join(', ');
   };
 
   const getStatusBadge = (status) => {
+    const statusUpper = (status || 'offline').toUpperCase();
     return (
       <span 
         style={{
-          color: status === 'AVAILABLE' ? '#22c55e' : '#6b7280',
+          color: status === 'online' ? '#22c55e' : status === 'busy' ? '#f97316' : '#6b7280',
           fontWeight: '600',
           fontSize: '14px'
         }}
       >
-        {status}
+        {statusUpper}
       </span>
     );
   };
@@ -103,8 +88,9 @@ export default function RespondersList() {
             }}
           >
             <option value="">Status</option>
-            <option value="AVAILABLE">Available</option>
-            <option value="BUSY">Busy</option>
+            <option value="online">Online</option>
+            <option value="busy">Busy</option>
+            <option value="offline">Offline</option>
           </select>
           <select
             value={filters.role}
@@ -116,10 +102,12 @@ export default function RespondersList() {
               fontSize: '14px'
             }}
           >
-            <option value="">Role</option>
-            <option value="NGO">NGO</option>
-            <option value="RESPONDER">Responder</option>
-            <option value="FOREST_OFFICIAL">Forest Official</option>
+            <option value="">Category</option>
+            <option value="injured_animal">Injured Animal</option>
+            <option value="animal_sighting">Animal Sighting</option>
+            <option value="abandoned_pet">Abandoned Pet</option>
+            <option value="human_wildlife_conflict">Wildlife Conflict</option>
+            <option value="predator_sighting">Predator Sighting</option>
           </select>
           <button
             onClick={clearFilters}
@@ -156,13 +144,13 @@ export default function RespondersList() {
                   Organization
                 </th>
                 <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
-                  Role
+                  Contact
                 </th>
                 <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
                   Status
                 </th>
                 <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
-                  Expertise
+                  Categories
                 </th>
                 <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6b7280' }}>
                   Active Cases
@@ -209,17 +197,17 @@ export default function RespondersList() {
                   <td style={{ padding: '12px', fontSize: '14px' }}>
                     {responder.organization}
                   </td>
-                  <td style={{ padding: '12px' }}>
-                    {getRoleBadge(responder.role)}
-                  </td>
-                  <td style={{ padding: '12px' }}>
-                    {getStatusBadge(responder.status || 'AVAILABLE')}
-                  </td>
                   <td style={{ padding: '12px', fontSize: '14px', color: '#6b7280' }}>
-                    {responder.expertise?.join(', ').toUpperCase() || 'N/A'}
+                    {responder.whatsappNumber || responder.contactInfo?.phone || 'N/A'}
+                  </td>
+                  <td style={{ padding: '12px' }}>
+                    {getStatusBadge(responder.status)}
+                  </td>
+                  <td style={{ padding: '12px', fontSize: '12px', color: '#6b7280' }}>
+                    {getRoleBadge(responder.categoriesHandled)}
                   </td>
                   <td style={{ padding: '12px', fontSize: '14px', textAlign: 'center' }}>
-                    {responder.activeCases || 0}
+                    {responder.currentCases?.length || 0}
                   </td>
                   <td style={{ padding: '12px', fontSize: '14px', color: '#6b7280' }}>
                     {responder.lastSeen ? new Date(responder.lastSeen).toLocaleString('en-IN', {

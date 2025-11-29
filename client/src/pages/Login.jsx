@@ -51,7 +51,7 @@ function Login() {
               onChange={(e) => setEmail(e.target.value)}
               required
               style={{ width: '100%' }}
-              placeholder="admin@wildlife-demo.local"
+              placeholder="admin@wildlife.local"
             />
           </div>
 
@@ -65,7 +65,7 @@ function Login() {
               onChange={(e) => setPassword(e.target.value)}
               required
               style={{ width: '100%' }}
-              placeholder="demo123"
+              placeholder="admin123"
             />
           </div>
 
@@ -97,11 +97,20 @@ function Login() {
           padding: '12px', 
           background: '#f9fafb', 
           borderRadius: '4px',
-          fontSize: '12px'
+          fontSize: '12px',
+          lineHeight: '1.6'
         }}>
-          <strong>Demo Credentials:</strong><br />
-          Admin: admin@wildlife-demo.local / demo123<br />
-          Responder: responder@wildlife-demo.local / demo123
+          <strong>Login Credentials:</strong><br />
+          <div style={{ marginTop: '8px' }}>
+            <strong>Admin:</strong><br />
+            admin@wildlife.local / admin123
+          </div>
+          <div style={{ marginTop: '8px' }}>
+            <strong>Responders:</strong><br />
+            priya.sharma@wildlife.in / responder123<br />
+            rajesh.kumar@forestdept.in / responder123<br />
+            anjali.desai@animalcare.in / responder123
+          </div>
         </div>
       </div>
     </div>
