@@ -36,6 +36,49 @@ router.post('/demo-voice-cases', async (req, res) => {
       await adminUser.save();
     }
 
+    // Create demo responder users (for dashboard login)
+    let responderUser1 = await User.findOne({ email: 'amit.patel@wildlifengo.in' });
+    if (!responderUser1) {
+      responderUser1 = new User({
+        name: 'Amit Patel',
+        email: 'amit.patel@wildlifengo.in',
+        password: 'responder123',
+        role: 'RESPONDER',
+        whatsappNumber: '+919876543001',
+        isActive: true
+      });
+      responderUser1.markModified('password');
+      await responderUser1.save();
+    }
+
+    let responderUser2 = await User.findOne({ email: 'rajesh.kumar@rescue.in' });
+    if (!responderUser2) {
+      responderUser2 = new User({
+        name: 'Dr. Rajesh Kumar',
+        email: 'rajesh.kumar@rescue.in',
+        password: 'responder123',
+        role: 'RESPONDER',
+        whatsappNumber: '+919876543002',
+        isActive: true
+      });
+      responderUser2.markModified('password');
+      await responderUser2.save();
+    }
+
+    let responderUser3 = await User.findOne({ email: 'priya.sharma@forest.gov.in' });
+    if (!responderUser3) {
+      responderUser3 = new User({
+        name: 'Priya Sharma',
+        email: 'priya.sharma@forest.gov.in',
+        password: 'responder123',
+        role: 'RESPONDER',
+        whatsappNumber: '+919876543003',
+        isActive: true
+      });
+      responderUser3.markModified('password');
+      await responderUser3.save();
+    }
+
     // Create demo responders (Indian locations)
     let amitPatel = await Responder.findOne({ whatsappNumber: '+919876543001' });
     if (!amitPatel) {
@@ -306,7 +349,12 @@ router.post('/demo-voice-cases', async (req, res) => {
         { caseId: voiceCaseHi.caseId, source: 'voice', language: 'Hindi' }
       ],
       users: {
-        admin: { email: 'admin@wildlife-demo.local', password: 'demo123' }
+        admin: { email: 'admin@wildlife-demo.local', password: 'demo123' },
+        responders: [
+          { email: 'amit.patel@wildlifengo.in', password: 'responder123' },
+          { email: 'rajesh.kumar@rescue.in', password: 'responder123' },
+          { email: 'priya.sharma@forest.gov.in', password: 'responder123' }
+        ]
       },
       responders: [
         { name: amitPatel.name, organization: amitPatel.organization, district: 'Bengaluru Urban' },

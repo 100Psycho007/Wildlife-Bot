@@ -4,16 +4,16 @@
   "description": "Wildlife WhatsApp Bot System - Monorepo",
   "private": true,
   "scripts": {
-    "dev:server": "cd server && npm run dev",
-    "dev:client": "cd client && npm run dev",
-    "start:dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "start:server": "cd server && npm start",
-    "build:client": "cd client && npm run build",
-    "test": "cd server && npm test",
-    "seed": "cd server && npm run seed",
-    "seed:demo": "cd server && npm run seed:demo",
-    "pixel-check": "cd server && npm run pixel-check",
-    "install:all": "npm install && cd server && npm install && cd ../client && npm install"
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "start:dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "start:backend": "cd backend && npm start",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "cd backend && npm test",
+    "seed": "cd backend && npm run seed",
+    "seed:demo": "cd backend && npm run seed:demo",
+    "pixel-check": "cd backend && node scripts/pixel-check.js --baseUrl=http://localhost:5173",
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
